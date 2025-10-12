@@ -177,6 +177,21 @@
 - We avoid heavy persistent caches for aggregations; SQLite with proper indexes is fast and correct.
 - All disk writes (albums, state) are atomic with rotating backups.
 
+### Foundations (cross-cutting)
+
+- AtomicJsonStore utility used by UI state and album JSON
+- Logger setup (pino) and error code catalog
+- Result<T, E> helper for service layers and error propagation
+- App event bus (typed) for `selectionChanged`, `filtersChanged`, `albumLoaded`
+- Data migrations policy for UI state and DB
+
+### Testing strategy and budgets
+
+- Property-based tests for date/location resolvers
+- Contract tests (OpenAPI typed client once available)
+- Large-data smoke (50k synthetic files) in nightly CI (later)
+- Performance budgets: search < 150ms @10k files; first thumbnail < 500ms
+
 ### To-dos
 
 - [ ] Initialize Node+TS monorepo, linting, tsconfig paths, pnpm or npm workspaces
@@ -205,3 +220,150 @@
 - [ ] Implement TagLibrary→Selection and filter node DnD via dnd-kit
 - [ ] Tutorials: define shared schema, build TutorialRunner and tutorials route, implement Playwright adapter
 - [ ] Bundle server, web build, ExifTool, DB into portable folder
+
+### Workpackages: Phase 1 (granular)
+
+1) Initialize Node+TS monorepo, linting, tsconfig paths, workspaces
+- [ ] Create `package.json` with workspaces (`packages/*`, `server`, `web`) and scripts: `lint`, `type-check`, `depcruise`
+- [ ] Add `pnpm-workspace.yaml` (or npm workspaces) and lockfile
+- [ ] Add `tsconfig.base.json` with path aliases for `@shared/*` and strict options
+- [ ] Create minimal `packages/shared/` with tsconfig and a sample type to validate path mapping
+- [ ] Wire ESLint to TypeScript (uses `.eslintrc.cjs`), add `lint` script; ensure it runs
+- [ ] Add `depcruise` script and run against an empty structure (should pass)
+- Acceptance: `npm run lint` passes; `npx depcruise` passes; `tsc -p tsconfig.base.json --noEmit` passes
+
+2) Server bootstrap: Express, health route, static serving
+- [ ] Scaffold `server/package.json` + `tsconfig.json`
+- [ ] Implement `server/src/index.ts` Express app with `GET /api/health -> { ok: true }`
+- [ ] Configure static serving from `/web/dist` (placeholder path for now)
+- [ ] Add scripts: `server:dev` (ts-node/tsx), `server:build` (tsc), `server:start`
+- [ ] Add unit test with supertest for `/api/health`
+- Acceptance: `npm run server:test` green; curl to `/api/health` returns 200 JSON
+
+3) Database: Drizzle + better-sqlite3, schema and migrations for files/tags
+- [ ] Install Drizzle, better-sqlite3, and CLI; set up `drizzle.config.ts`
+- [ ] Create schema modules: `files`, `tags`, `file_tags` with needed indexes
+- [ ] Generate and run initial migration to `data/phoTool.db`
+- [ ] Add DB util to open connection and run a smoke query
+- [ ] Add unit test that inserts a tag and links it to a file id
+- Acceptance: migration runs clean; test passes; basic query returns expected rows
+
+4) ExifTool service (stay-open) with read/write helpers
+- [ ] Install `exiftool-vendored` and create `server/src/services/exiftool.ts`
+- [ ] Implement start/stop lifecycle and a `readMetadata(filePath)` helper
+- [ ] Implement write helpers for tags: flat `dc:Subject` and hierarchical `lr:HierarchicalSubject` to sidecar
+- [ ] Add a small fixture directory and tests that mock the exiftool process for CI
+- [ ] Provide mapping utils between DB tags and XMP fields
+- Acceptance: unit tests for `readMetadata` (mocked) and mapping pass; manual run against a sample file succeeds locally
+
+### Workpackages: Phase 2 — Incremental scanner and scan API
+
+- [ ] Implement `server/src/services/scanner.ts`
+  - Compute normalized source signature (sorted, normalized paths → sha1)
+  - Walk directories; capture (`size`,`mtime`) and sidecar `xmp_mtime`
+  - Detect adds/updates/deletes; update DB tables; no ExifTool read if unchanged
+- [ ] Add `POST /api/scan { roots, mode?: 'auto'|'full' }` and `GET /api/scan/status`
+  - Queue long-running scan; status provides progress (files scanned/total)
+- [ ] Tests with `mock-fs` for add/update/delete and signature unchanged fast path
+- Acceptance: scan auto-mode skips unchanged; status reports progress; DB reflects file set
+
+### Workpackages: Phase 3 — Search, thumbnails, and aggregations
+
+- [ ] Implement `server/src/services/queryBuilder.ts` for `FilterChain`
+  - Node SQL (any/all) and CTE combination (INTERSECT/UNION/EXCEPT)
+- [ ] `POST /api/files/search` with paging + sort; returns ids and lightweight fields
+- [ ] Thumbnails: `server/src/services/thumbnails.ts` using `sharp`
+  - Disk cache by `file_id + mtime`; `GET /api/file/:id/thumbnail`
+- [ ] Aggregations endpoints: `GET /api/tags/aggregate?scope=selection|source`
+- [ ] Tests: query builder unit tests; thumbnail cache invalidation; aggregate counts
+- Acceptance: queries return expected ids; thumbnails cached; aggregates correct on fixtures
+
+### Workpackages: Phase 4 — Tags, groups, and application semantics
+
+- [ ] Tag groups tables and CRUD: `GET/POST /api/tag-groups`; items add/remove endpoints
+- [ ] Tag CRUD: `GET/POST /api/tags` (create/rename/color)
+- [ ] Tag application endpoints:
+  - `POST /api/files/:id/tags` and `POST /api/files/tags` (batch) with add/remove/set
+- [ ] Library delete semantics implemented server-side (group unlink and selection removal)
+- [ ] Tests cover group membership, batch apply/remove, and semantics
+- Acceptance: API operations match rules; tests pass
+
+### Workpackages: Phase 5 — Placeholder resolver and offline geocoder
+
+- [ ] Implement date placeholder resolver (year/month/day/weekday) from `taken_at`
+- [ ] Implement location resolver: country/state/city
+  - Use EXIF textual fields; fallback to offline dataset (country builtin; optional GeoNames pack)
+  - Cache lat/lon → result in DB
+- [ ] `POST /api/expand-placeholder` to preview expansions for file ids
+- [ ] Tests with fixture coordinates and date-times
+- Acceptance: resolver returns deterministic tags; caching reduces repeat cost
+
+### Workpackages: Phase 6 — Web scaffold and state foundation
+
+- [ ] Scaffold Vite React app (`web/`) with TanStack Router, Zustand, Tailwind
+- [ ] Create `state/` slices (selection, filters, tags, layout, prefs)
+- [ ] Integrate API client typed from shared types
+- [ ] Smoke route renders app shell
+- Acceptance: `web` dev server runs; basic navigation works
+
+### Workpackages: Phase 7 — FilterBuilder UI and DnD to nodes
+
+- [ ] `modules/filter/FilterBuilder` with Starting Node + dynamic connectors (and|or|and not|none)
+- [ ] `FilterNodeView` with mode any/all and tag chips; drop target for TagPills/placeholders (expand on drop)
+- [ ] Connector changes create/prune nodes as specified
+- [ ] Stories cover empty, one-node, multi-node, pruning, keyboard Delete in node
+- Acceptance: stories pass; node chain behaves per spec
+
+### Workpackages: Phase 8 — TagLibrary UI (tabs, groups, context menus)
+
+- [ ] Tabs: Automatic, User Defined, plus dynamic user groups
+- [ ] `PlaceholderList` draggables; `UserTagList` with search and context menu; `GroupTabView`
+- [ ] Keyboard Delete and context actions per three-context rules
+- [ ] Stories for each tab state and context menu flows
+- Acceptance: stories and component tests validate actions and focus/keyboard behavior
+
+### Workpackages: Phase 9 — Placeholder to Selection and file apply flows
+
+- [ ] Implement Selection panel and DnD from TagLibrary (store placeholder tokens in UI)
+- [ ] Batch apply/remove selected tags to files via API; progress/toasts
+- [ ] Stories for selection list and DnD; tests for apply/remove payloads
+- Acceptance: selection updates reflected via API; tests green
+
+### Workpackages: Phase 10 — UI state persistence
+
+- [ ] Define Zod schema in `packages/shared/uiState.ts` with versioning
+- [ ] Server: `GET/PUT /api/state` writes `data/ui-state.json` atomically with rotating backups
+- [ ] Client: `persist.ts` subscribes to slices, debounced save; `hydrate.ts` loads + migrations
+- [ ] BroadcastChannel to sync tabs; import/export/reset actions
+- Acceptance: reload restores layout, filters, sources; backups rotate; tabs stay in sync
+
+### Workpackages: Phase 11 — i18n matrix and contextual help
+
+- [ ] Create `i18n/en/ui.json` and `i18n/de/ui.json`; loader and `useI18n(uiId)` hook
+- [ ] Tooltip for `hint`; Help-mode toggle (`?`) with custom cursor and `DocPopover` for `doc`
+- [ ] Script to verify all `data-uiid` exist in all languages
+- [ ] Stories show RTL and language swap; tests verify text resolutions
+- Acceptance: coverage script passes; help-mode suppresses clicks and shows docs
+
+### Workpackages: Phase 12 — Smart Albums (file JSON) and refresh cycle
+
+- [ ] CRUD endpoints over `data/albums/*.json` (atomic write + backup)
+- [ ] Albums panel UI (Load/Update/Add/Delete)
+- [ ] On Load or filter change: orchestrate search → aggregates; auto-switch to Statistics; refresh panes
+- [ ] Signature check skips scan when sources unchanged; otherwise `scan auto`
+- Acceptance: loading albums reconstructs UI; unchanged sources avoid re-scan; panes refresh
+
+### Workpackages: Phase 13 — Tutorials and Playwright adapter
+
+- [ ] Define `packages/shared/tutorial.ts` schema and JSON examples
+- [ ] In-app `TutorialRunner` and tutorials route (left list + app canvas)
+- [ ] Playwright adapter executes the same scripts for CI
+- [ ] Scripts for core flows: placeholder to selection, filter chain, album load, delete semantics
+- Acceptance: tutorial scripts run in-app and headless; CI smoke passes
+
+### Workpackages: Phase 14 — Packaging (portable build)
+
+- [ ] Build web (`web/dist`) and server (`server/dist`); include ExifTool binary and `data/`
+- [ ] Package with `pkg`/`nexe` into a portable folder; start server at 127.0.0.1:5000 and open browser
+- [ ] Smoke test portable on Windows; read/write to `data/` works
+- Acceptance: a single folder runs the app; healthcheck and basic flows work

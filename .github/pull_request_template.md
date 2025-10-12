@@ -13,6 +13,10 @@ Describe the change, user impact, and any design decisions.
 - [ ] Tutorials updated or verified
 - [ ] If a workaround was needed, added an ADR or performed a refactor first
 
+### Meta
+- [ ] Conventional Commit title (e.g., `feat: ...`)
+- [ ] ADR referenced or added (if design-impacting)
+
 ## Screenshots/Recordings
 
 If UI changes, add screenshots or a short clip.

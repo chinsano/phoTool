@@ -29,6 +29,62 @@
 - PR Template (see `.github/pull_request_template.md`)
   - Checklist ensures stories/tests/i18n/architecture boundaries.
 
+## Commit and PR guidelines
+
+- Use Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`
+- Prefer small PRs (≤ 300 lines changed). If larger, split into workpackages.
+- PR must include stories/tests and, when design-affecting, an ADR (below).
+
+## ADR (Architecture Decision Record) template
+
+```
+# ADR-XXXX: <Short title>
+
+Status: Proposed | Accepted | Superseded by ADR-YYYY
+Date: YYYY-MM-DD
+
+Context
+  What problem are we solving? Constraints? Alternatives?
+
+Decision
+  What did we decide? Scope and boundaries.
+
+Consequences
+  Positive: ...  Negative: ...  Follow-ups: ...
+
+References
+  Links to issues, PRs, docs
+```
+
+Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
+
+## Contracts and types
+
+- Define schemas with Zod in `packages/shared`; derive TS types from schemas.
+- Generate OpenAPI from server routes (later) and typed client; CI fails on drift.
+
+## Observability and errors
+
+- Single logger (pino) with levels; no `console.*` in production code.
+- Typed error codes; UI ErrorBoundary + toast surface.
+- Never swallow errors; either handle or bubble to an error boundary.
+
+## Invariants and assertions
+
+- Use a small `invariant(condition, message)` helper (stripped in production builds).
+- Exhaustive `switch` with `never` to verify unions.
+
+## Security and safety
+
+- Sanitize any Markdown (`doc`) before rendering.
+- Normalize and validate all filesystem paths (no traversal).
+- ExifTool arg allowlist; cap parallelism; timeouts on external calls.
+
+## Performance defaults
+
+- Virtualize large lists; cancel stale requests; debounce expensive actions.
+- Use worker threads for CPU-bound work; cap ExifTool concurrency.
+
 ## PR Checklist
 
 - [ ] Added/updated Storybook stories for new/changed components
@@ -83,3 +139,15 @@ Stories must include: all variants/sizes; with/without icon; loading/disabled; R
 2. Identify which rule is violated; refactor to restore the rule (ports, boundaries, composition).
 3. Implement the fix in the correct layer.
 4. Extend tests/stories; run full checks.
+
+## Workpackage cadence (stop-and-test rule)
+
+- Always break features into the smallest separately testable workpackages (target ≤ 1–2 hours).
+- Each workpackage must define its acceptance checks up front (unit tests, stories/states, and/or a short Playwright script).
+- Implementation loop for every workpackage:
+  1) Create a small branch named `feat/<scope>-<item>`.
+  2) Implement just that item with stories/tests first.
+  3) Run local gates: `lint`, `type-check`, `test`, `story:build`.
+  4) Stop. Manually verify in Storybook or the dev app; adjust if needed.
+  5) Commit and open a PR; CI must pass before starting the next item.
+- If a change exceeds 2 hours or touches multiple layers, split it before proceeding.
