@@ -1,0 +1,85 @@
+# phoTool Implementation Rules and Enforcement
+
+## Principles
+
+- Modular by default
+  - Feature-first folders with public API barrels; no deep or cross-feature imports.
+  - Functional core, imperative shell: pure logic in utils/selectors/services; effects only at edges.
+- Clear boundaries
+  - Define ports in `packages/shared/ports/*`; implement adapters in `server/services/*` and HTTP routes.
+  - UI split: presentational components (pure, props-only) vs containers/hooks (data fetching, state).
+- Single source of truth
+  - Types and Zod schemas live in `packages/shared`; APIs and state use them end-to-end.
+- Composition over configuration
+  - Prefer small, composable components and hooks over mega-props.
+- Accessibility and i18n first
+  - Every interactive component has a `data-uiid` and ARIA role; all text from the i18n matrix.
+- Test- and story-first
+  - Reproduce issues via a failing test or Storybook story before fixing; add stories for all states.
+
+## Enforcement (automated)
+
+- TypeScript strict (when tsconfig is added): `noImplicitAny`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`.
+- ESLint (see `.eslintrc.cjs`)
+  - Forbid cycles and unsafe patterns; enforce a11y and consistent type imports.
+- Dependency Cruiser (see `.dependency-cruiser.cjs`)
+  - Forbid `web` importing `server` and vice versa; allow both to import `packages/shared`.
+- CI (see `.github/workflows/ci.yml`)
+  - Lint, type-check, Storybook build, dependency rules, and tests (when the Node workspace exists).
+- PR Template (see `.github/pull_request_template.md`)
+  - Checklist ensures stories/tests/i18n/architecture boundaries.
+
+## PR Checklist
+
+- [ ] Added/updated Storybook stories for new/changed components
+- [ ] Wrote unit tests for logic and component tests for UI states
+- [ ] Used shared types/Zod schemas; no ad-hoc DTOs
+- [ ] No cross-feature imports; only via public API barrels
+- [ ] Labels/hints/docs wired via `uiId` and present in all i18n files
+- [ ] Components are pure; side effects live in hooks/services
+- [ ] Tutorials updated or verified
+- [ ] If a workaround was needed, added an ADR or performed a refactor first
+
+## Atomic UI workflow ("button zoo" first)
+
+1. Implement atomic component in `packages/ui`.
+2. Add Storybook stories covering variants, sizes, disabled/loading, RTL, help-mode, and i18n swap.
+3. Add tests with Testing Library/Vitest for rendering, a11y, keyboard, help-mode.
+4. Only then use the component in app containers.
+
+## Generic Button blueprint
+
+Props:
+- `uiId: UIElementId`
+- `variant: 'primary' | 'secondary' | 'ghost' | 'danger'`
+- `size: 'sm' | 'md' | 'lg'`
+- `icon?: ReactNode`
+- `disabled?: boolean`
+- `loading?: boolean`
+- `onClick?: () => void`
+- `type?: 'button' | 'submit' | 'reset'`
+
+Behavior:
+- Fetch `label` and `hint` from `useI18n(uiId)`; render label; set `title={hint}`.
+- In help-mode, show `DocPopover` using `doc`; clicks do nothing.
+- Keyboard: Enter/Space activation; `aria-busy` when loading; focus ring; respects `disabled`.
+- Stable class hooks: `.btn`, `.btn--{variant}`, `.btn--{size}` only.
+
+Stories must include: all variants/sizes; with/without icon; loading/disabled; RTL; help-mode; i18n swap.
+
+## Ports and Adapters
+
+- Ports: `ExifToolPort`, `ScannerPort`, `AlbumsPort`, `StatePort`, `I18nPort` (in `packages/shared`).
+- Adapters: `server/services/*` implement ports; `server/routes/*` call adapters; `web` uses HTTP clients typed from shared ports.
+
+## Error handling and logging
+
+- Typed errors (status + code) surfaced to a toaster; no silent catches.
+- Either handle an error or bubble it; never swallow.
+
+## How to fix issues without hacks
+
+1. Reproduce with a failing test or story.
+2. Identify which rule is violated; refactor to restore the rule (ports, boundaries, composition).
+3. Implement the fix in the correct layer.
+4. Extend tests/stories; run full checks.

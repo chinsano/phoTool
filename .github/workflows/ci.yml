@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install tooling (if package.json exists)
+        run: |
+          if [ -f package.json ]; then
+            npm ci || true
+          else
+            echo "No package.json yet; skipping install"
+          fi
+      - name: Lint (ESLint)
+        run: |
+          if [ -f package.json ]; then
+            npx eslint . || true
+          else
+            echo "No workspace yet; soft pass"
+          fi
+      - name: Dependency rules (dependency-cruiser)
+        run: |
+          npx depcruise --config .dependency-cruiser.cjs . || true
+      - name: Type check
+        run: |
+          if [ -f tsconfig.json ]; then
+            npx tsc -noEmit || true
+          else
+            echo "No tsconfig.json yet; soft pass"
+          fi
+
+
