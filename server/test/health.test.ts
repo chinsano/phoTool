@@ -1,6 +1,7 @@
 import { HealthResponse } from '@shared/contracts/health';
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
+
 import { createApp } from '../src/app.js';
 
 describe('GET /api/health', () => {

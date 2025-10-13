@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
+
 import { files } from '../src/db/schema/files.js';
 import { fileTags } from '../src/db/schema/fileTags.js';
 import { tags } from '../src/db/schema/tags.js';

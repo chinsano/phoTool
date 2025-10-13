@@ -25,10 +25,10 @@ module.exports = {
     },
     {
       name: 'only-shared-cross-boundary',
-      comment: 'cross-boundary imports go through packages/shared',
+      comment: 'app code may only cross to other local packages via packages/shared; tests and config are allowed to use node_modules and built-ins',
       severity: 'warn',
-      from: { path: '^(web|server)/' },
-      to: { pathNot: '^(packages/shared|web/|server/)' }
+      from: { path: '^(server/src|web/src)/' },
+      to: { path: '^packages/(?!shared/)', dependencyTypes: ['local'] }
     }
   ],
   options: {
