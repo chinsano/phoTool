@@ -24,6 +24,7 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
     "husky": "^9.1.6",
