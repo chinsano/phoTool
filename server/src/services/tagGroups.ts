@@ -1,6 +1,7 @@
+import { and, eq } from 'drizzle-orm';
+
 import { db } from '../db/client.js';
 import { tagGroupItems, tagGroups } from '../db/schema/index.js';
-import { and, eq } from 'drizzle-orm';
 
 export class TagGroupsService {
   async list() {
@@ -13,7 +14,7 @@ export class TagGroupsService {
       .insert(tagGroups)
       .values({ name: input.name })
       .returning({ id: tagGroups.id });
-    return { id: row.id };
+    return { id: row!.id };
   }
 
   async changeItems(

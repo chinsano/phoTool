@@ -1,9 +1,9 @@
-import { Router } from 'express';
 import {
   tagGroupCreateSchema,
   tagGroupItemsChangeSchema,
   tagGroupListResponseSchema,
 } from '@phoTool/shared';
+import { Router } from 'express';
 
 import { TagGroupsService } from '../services/tagGroups.js';
 
@@ -38,7 +38,10 @@ export function createTagGroupsRouter() {
       res.status(400).json({ error: 'Invalid request', details: parsed.error.flatten() });
       return;
     }
-    await service.changeItems(id, parsed.data);
+    const change: { add?: number[]; remove?: number[] } = {};
+    if (parsed.data.add) change.add = parsed.data.add;
+    if (parsed.data.remove) change.remove = parsed.data.remove;
+    await service.changeItems(id, change);
     res.status(204).end();
   });
 

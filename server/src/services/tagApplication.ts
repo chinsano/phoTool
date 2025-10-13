@@ -1,6 +1,7 @@
+import { and, eq } from 'drizzle-orm';
+
 import { db } from '../db/client.js';
 import { fileTags } from '../db/schema/index.js';
-import { and, eq } from 'drizzle-orm';
 
 export class TagApplicationService {
   async applyToFile(input: { fileId: number; mode: 'add' | 'remove' | 'set'; tagIds: number[] }) {

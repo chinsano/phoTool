@@ -1,5 +1,5 @@
-import { Router } from 'express';
 import { tagApplyBatchSchema, tagApplySingleSchema } from '@phoTool/shared';
+import { Router } from 'express';
 
 import { TagApplicationService } from '../services/tagApplication.js';
 

@@ -1,6 +1,7 @@
+import { eq } from 'drizzle-orm';
+
 import { db } from '../db/client.js';
 import { tags } from '../db/schema/index.js';
-import { eq } from 'drizzle-orm';
 
 export class TagsService {
   async list() {
@@ -29,7 +30,7 @@ export class TagsService {
         source: 'user',
       })
       .returning({ id: tags.id });
-    return { id: row.id };
+    return { id: row!.id };
   }
 
   async update(id: number, input: { name?: string; color?: string | null }) {

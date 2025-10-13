@@ -1,9 +1,9 @@
-import { Router } from 'express';
 import {
   tagCreateSchema,
   tagListResponseSchema,
   tagUpdateSchema,
 } from '@phoTool/shared';
+import { Router } from 'express';
 
 import { TagsService } from '../services/tags.js';
 
@@ -23,7 +23,12 @@ export function createTagsRouter() {
       res.status(400).json({ error: 'Invalid request', details: parsed.error.flatten() });
       return;
     }
-    const { id } = await service.create(parsed.data);
+    const input: { name: string; color?: string | null; parent_id?: number | null } = {
+      name: parsed.data.name,
+    };
+    if ('color' in parsed.data) input.color = parsed.data.color ?? null;
+    if ('parent_id' in parsed.data) input.parent_id = parsed.data.parent_id ?? null;
+    const { id } = await service.create(input);
     res.status(201).json({ id });
   });
 
@@ -38,7 +43,10 @@ export function createTagsRouter() {
       res.status(400).json({ error: 'Invalid request', details: parsed.error.flatten() });
       return;
     }
-    await service.update(id, parsed.data);
+    const input: { name?: string; color?: string | null } = {};
+    if ('name' in parsed.data) input.name = parsed.data.name as string;
+    if ('color' in parsed.data) input.color = parsed.data.color ?? null;
+    await service.update(id, input);
     res.status(204).end();
   });
 

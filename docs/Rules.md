@@ -98,7 +98,8 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - [ ] Reviewed/updated Pre-commit checklist if functionality adds new required checks
 
 ## Pre-commit checklist (local)
-- Run ESLint: `npm run lint` (and zero warnings: `npm run lint:ci`)
+- General: treat all warnings as errors
+- Run repo-wide lint with zero warnings: `npm run lint:ci`
 - Run dependency rules: `npm run depcruise`
 - Run type-check: `npm run type-check`
 - Server workspace install: `npm --workspace @phoTool/server install --no-audit --no-fund`
@@ -108,12 +109,11 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - If DB schema changed: generate and migrate locally
 - If decisions or scope changed: update ADRs/EHs/plan
 - No `console.*` in prod code; use logger
-- Update plan: mark relevant TODOs complete in `docs/phoTool.plan.md` (REQUIRED when touching `packages/shared/` or `server/src/`)
-- Review this checklist itself and update it if new functionality introduces additional checks (e.g., new workspaces, Storybook build/tests, E2E)
+- Update plan: mark relevant TODOs complete in `docs/phoTool.plan.md` (REQUIRED when touching `packages/shared/`, `server/src/`, `server/drizzle/`, or `docs/adr/`)
 
 Local enforcement
-- Pre-commit: runs lint-staged (`eslint --fix` and zero-warnings) on staged files
-- Pre-push: runs type-check, `lint:ci`, and tests across the repo
+- Pre-commit: runs lint-staged and repo-wide gates (`lint:ci`, `type-check`, `depcruise`) and blocks commit on failure; blocks commit if changes in `server/src/`, `server/drizzle/`, `packages/shared/src/`, or `docs/adr/` lack a staged update to `docs/phoTool.plan.md`.
+- Pre-push: runs `lint:ci`, `depcruise`, `type-check`, builds shared, installs server deps, runs tests, and enforces the same docs plan update check vs `origin/main`.
 
 ## Atomic UI workflow ("button zoo" first)
 

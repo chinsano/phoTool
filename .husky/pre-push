@@ -1,11 +1,10 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/h"
 
-npm run lint && \
+npm run lint:ci && \
 npm run depcruise && \
 npm run type-check && \
 npm --workspace @phoTool/server install --no-audit --no-fund && \
 npm --workspace @phoTool/shared run build && \
-npm run lint:ci && \
 npm run test:ci && \
 node -e "const { execSync } = require('node:child_process'); const base = 'origin/main'; try { execSync('git fetch origin main --depth=1', { stdio: 'ignore' }) } catch {} ; const diff = execSync('git diff --name-only '+base+'...HEAD').toString(); if (/(^server\/src\/|^server\/drizzle\/|^packages\/shared\/src\/|^docs\/adr\/)/m.test(diff) && !/^docs\/phoTool.plan.md$/m.test(diff)) { console.error('\n[docs enforcement] Changes touch server/shared/adr without updating docs/phoTool.plan.md'); process.exit(1) }"
