@@ -11,4 +11,7 @@ server/.server.pid
 coverage/
 Thumbs.db
 
+# Test temporary directories
+server/tmp-*
+
 

@@ -38,9 +38,6 @@ jobs:
       - name: Server - install deps
         run: npm --workspace @phoTool/server install --no-audit --no-fund
 
-      - name: Server - generate migrations
-        run: npm --workspace @phoTool/server run db:generate
-
       - name: Shared - build
         run: npm --workspace @phoTool/shared run build
 

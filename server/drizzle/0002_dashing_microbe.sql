@@ -1,4 +1,4 @@
-CREATE TABLE `tag_group_items` (
+CREATE TABLE IF NOT EXISTS `tag_group_items` (
 	`group_id` integer NOT NULL,
 	`tag_id` integer NOT NULL,
 	PRIMARY KEY(`group_id`, `tag_id`),
@@ -6,7 +6,7 @@ CREATE TABLE `tag_group_items` (
 	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `tag_groups` (
+CREATE TABLE IF NOT EXISTS `tag_groups` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL
 );
