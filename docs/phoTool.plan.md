@@ -368,13 +368,71 @@
 
 ### Workpackages: Phase 5 — Placeholder resolver and offline geocoder
 
-- [ ] Implement date placeholder resolver (year/month/day/weekday) from `taken_at`
-- [ ] Implement location resolver: country/state/city
-  - Use EXIF textual fields; fallback to offline dataset (country builtin; optional GeoNames pack)
-  - Cache lat/lon → result in DB
-- [ ] `POST /api/expand-placeholder` to preview expansions for file ids
-- [ ] Tests with fixture coordinates and date-times
-- Acceptance: resolver returns deterministic tags; caching reduces repeat cost
+1) Shared contracts and port
+- [x] Add `packages/shared/src/contracts/placeholders.ts` (Zod): `PlaceholderToken = 'year'|'month'|'day'|'weekday'|'country'|'state'|'city'`; `ExpandPlaceholderRequest { fileIds: number[]; tokens: PlaceholderToken[] }`; `ExpandPlaceholderResponse { expansions: Record<number, string[]> }`
+- [x] Add `packages/shared/src/ports/placeholders.ts` exposing `PlaceholderResolverPort.expand(req)`
+- Acceptance: contracts exported via `packages/shared/src/index.ts`; schema round-trips in a unit test
+
+2) ADR: offline geocoder scope and cache policy
+- [x] Create `docs/adr/ADR-0003-placeholder-geocoder.md` covering dataset choice (builtin country polygons + optional GeoNames), precision policy (geohash length or decimal rounding), cache keying, and canonical tag name/slug formatting
+- Acceptance: ADR merged and referenced by resolver PRs
+
+3) DB schema for geocode cache
+- [x] Add `server/src/db/schema/geoCache.ts` and migration with fields `{ lat_rounded, lon_rounded, precision, country, state, city, source, updated_at }` and unique index on `(lat_rounded, lon_rounded, precision)`
+- Acceptance: migration applies; unique/indexes present in generated SQL
+
+4) Pure date resolver utility
+- [x] Add `server/src/services/placeholders/date.ts` (pure): derive `year`, `month (YYYY-MM)`, `day (YYYY-MM-DD)`, `weekday` from `files.taken_at`; locale-independent, UTC-safe; missing `taken_at` yields no expansions
+- [x] Tests: property/edge cases for boundaries and timezones
+- Acceptance: tests green; no I/O
+
+5) EXIF textual location extractor utility
+- [x] Add `server/src/services/placeholders/locationFromExif.ts` (pure): normalize EXIF textual fields to `{ country, state, city }`
+- [x] Tests: fixtures for mapping and missing fields
+- Acceptance: tests green; no I/O
+
+6) Offline geocoder adapter + datasets + cache layer
+- [ ] Data prep script: `scripts/fetch-geodata.ts` downloads/updates datasets under `data/geodata/` (Natural Earth admin-0; optional GeoNames cities/admin codes)
+- [ ] Preprocess: simplify country polygons to TopoJSON; build R-tree index for bbox prefilter; KD-tree for GeoNames nearest-city lookup
+- [x] Add `server/src/services/placeholders/offlineGeocoder.ts`: given `lat/lon` → apply precision → cache lookup → country via polygon → city/state via GeoNames (if enabled) → write-through cache
+- [x] Extend `packages/shared/src/config.ts` with `geocoder` settings: `enabled`, `precision`, `datasets.countryPolygons`, `datasets.geoNames`
+- [ ] Licensing docs: add attribution for GeoNames; list dataset versions in `docs/adr/ADR-0003-placeholder-geocoder.md`
+- [ ] Tests: known coords resolve deterministic country; city/state when datasets enabled; second call hits cache; dataset disabled path returns undefined
+- Acceptance: unit tests cover cache hit/miss, configuration flags, and deterministic outputs
+
+7) PlaceholderResolver service (port adapter)
+- [x] Add `server/src/services/placeholders/index.ts`: compose date resolver, EXIF extractor, and offline geocoder; precedence `EXIF text → offline geocoder`; format canonical tag labels/slugs per ADR
+- [ ] Logging and typed errors per Rules; no `console.*`
+- [x] Tests: in-memory DB verifies precedence and caching behavior
+- Acceptance: tests green; strict types enforced
+
+8) HTTP route
+- [x] Add `server/src/routes/placeholders.ts`: `POST /api/expand-placeholder` validating with shared Zod; limit `fileIds` length; wire into `app.ts`
+- [x] Route tests with supertest: validation errors, happy path, large input rejection
+- Acceptance: route tests green; response matches shared contract
+
+9) Performance and determinism smoke
+- [x] Local bench for ~1k expansions: first vs cached run; assert stable output formatting
+- Acceptance: cached run materially faster; outputs match golden samples
+
+10) Documentation and plan updates
+- [x] Update this plan and link the ADR; ensure acceptance checks are listed
+- Acceptance: plan updated; pre-commit/pre-push gates pass
+
+11) Optional online geocoding fallback (dev-only)
+- [ ] Config flag `geocoder.online.enabled` (default false) and rate-limit settings
+- [ ] Implement `server/src/services/placeholders/onlineGeocoder.ts` calling Nominatim with custom User-Agent and backoff; disabled in portable builds and CI by default
+- [ ] Tests: MSW-stubbed responses for a few coords; 429/backoff behavior; disabled path returns undefined
+- Acceptance: online fallback only used when explicitly enabled; tests use mocks only; no network in CI
+
+12) Phase 5 test coverage hardening
+- [x] Shared contracts: add `shared.placeholders.contract.test.ts` with valid/invalid round-trips
+- [x] Config: extend `config.test.ts` to cover `geocoder` defaults and overrides
+- [x] DB migration: add assertion that `geo_cache` table and unique index exist
+- [x] Service precedence: seed in-memory DB to verify `EXIF text → offline` order and token filtering
+- [x] Routes: expand supertest coverage (valid body → 200 shape; invalid tokens → 400; >1000 ids → 413)
+- [x] Determinism: stabilize and assert repeatability of outputs across two runs; keep perf checks non-timing-based
+- Acceptance: all new tests green locally; coverage includes contracts, config, DB presence, service precedence, route validation, and determinism
 
 ### Workpackages: Phase 6 — Web scaffold and state foundation
 

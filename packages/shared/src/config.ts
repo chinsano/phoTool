@@ -33,6 +33,14 @@ export const appConfigSchema = z.object({
     concurrency: z.number().int().positive().default(1),
     statusRetentionMs: z.number().int().positive().default(5 * 60 * 1000)
   }).default({}),
+  geocoder: z.object({
+    enabled: z.boolean().default(true),
+    precision: z.number().int().min(0).max(6).default(3),
+    datasets: z.object({
+      countryPolygons: z.boolean().default(false),
+      geoNames: z.boolean().default(false)
+    }).default({}),
+  }).default({}),
   thumbnails: thumbnailsConfigSchema.default({}),
 });
 

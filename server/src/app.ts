@@ -11,6 +11,7 @@ import { createFilesRouter } from './routes/files.js';
 import { createFileTagsRouter } from './routes/fileTags.js';
 import { createHealthRouter } from './routes/health.js';
 import { createLibraryRouter } from './routes/library.js';
+import { placeholdersRouter } from './routes/placeholders.js';
 import { createScanRouter } from './routes/scan.js';
 import { createSyncRouter } from './routes/sync.js';
 import { createTagGroupsRouter } from './routes/tagGroups.js';
@@ -37,6 +38,7 @@ export function createApp(options?: { port?: number }) {
   app.use('/api/tag-groups', createTagGroupsRouter());
   app.use('/api/tags', createTagsRouter());
   app.use('/api/files', createThumbnailsRouter());
+  app.use(placeholdersRouter);
   // Preferred mount for aggregations
   app.use('/api/aggregations', createAggregationsRouter());
   // Temporary alias for backward compatibility
