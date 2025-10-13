@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import request from 'supertest';
+import { describe, it, expect } from 'vitest';
 import { createApp } from '../src/app.js';
 
 describe('GET / (root)', () => {

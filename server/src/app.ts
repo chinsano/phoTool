@@ -1,11 +1,12 @@
 import express from 'express';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createHealthRouter } from './routes/health.js';
-import { errorHandler } from './middleware/errorHandler.js';
 import pinoHttp from 'pino-http';
+
 import { logger } from './logger.js';
-import fs from 'node:fs';
+import { errorHandler } from './middleware/errorHandler.js';
+import { createHealthRouter } from './routes/health.js';
 
 export function createApp(options?: { port?: number }) {
   const app = express();

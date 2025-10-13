@@ -1,5 +1,6 @@
-import { Router } from 'express';
 import { HealthResponse } from '@phoTool/shared';
+import { Router } from 'express';
+
 import { appMeta } from '../meta.js';
 
 export function createHealthRouter() {

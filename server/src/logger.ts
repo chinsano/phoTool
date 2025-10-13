@@ -1,6 +1,6 @@
-import pino from 'pino';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import pino from 'pino';
 
 const level = process.env.LOG_LEVEL || 'info';
 const isProd = process.env.NODE_ENV === 'production';

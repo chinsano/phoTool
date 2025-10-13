@@ -1,12 +1,12 @@
-import { beforeAll, describe, expect, it } from 'vitest';
 import Database from 'better-sqlite3';
+import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import path from 'node:path';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { files } from '../src/db/schema/files.js';
-import { tags } from '../src/db/schema/tags.js';
 import { fileTags } from '../src/db/schema/fileTags.js';
-import { eq } from 'drizzle-orm';
+import { tags } from '../src/db/schema/tags.js';
 
 describe('DB schema constraints', () => {
   const migrationsFolder = path.resolve(process.cwd(), 'drizzle');

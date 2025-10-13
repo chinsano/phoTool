@@ -1,6 +1,7 @@
+import { sql } from 'drizzle-orm';
+
 import { db } from './client.js';
 import { logger } from '../logger.js';
-import { sql } from 'drizzle-orm';
 
 async function run() {
   // Simple select to verify DB opens and Drizzle can execute

@@ -1,4 +1,5 @@
 import { integer, sqliteTable, index, primaryKey } from 'drizzle-orm/sqlite-core';
+
 import { files } from './files';
 import { tags } from './tags';
 
