@@ -8,7 +8,8 @@ import { logger } from '../logger.js';
 
 async function run() {
   const migrationsFolder = path.resolve(process.cwd(), 'drizzle');
-  const useTemp = process.env.CI === 'true' && !process.env.DB_FILE_PATH;
+  // Always use in-memory DB on CI to avoid clashing with any persisted DB
+  const useTemp = String(process.env.CI).toLowerCase() === 'true';
   const sqlite = useTemp ? new Database(':memory:') : null;
   const client = sqlite ? drizzle(sqlite) : db;
   try {
