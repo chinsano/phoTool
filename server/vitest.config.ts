@@ -7,6 +7,7 @@ export default defineConfig({
     environment: 'node',
     include: ['test/**/*.test.ts'],
     exclude: [],
+    setupFiles: ['./test/setup.ts'],
     server: {
       deps: {
         inline: [/@phoTool\/shared/]
