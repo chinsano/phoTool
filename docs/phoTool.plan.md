@@ -314,14 +314,30 @@
 
 ### Workpackages: Phase 3 — Search, thumbnails, and aggregations
 
-- [ ] Implement `server/src/services/queryBuilder.ts` for `FilterChain`
-  - Node SQL (any/all) and CTE combination (INTERSECT/UNION/EXCEPT)
-- [ ] `POST /api/files/search` with paging + sort; returns ids and lightweight fields
-- [ ] Thumbnails: `server/src/services/thumbnails.ts` using `sharp`
-  - Disk cache by `file_id + mtime`; `GET /api/file/:id/thumbnail`
-- [ ] Aggregations endpoints: `GET /api/tags/aggregate?scope=selection|source`
-- [ ] Tests: query builder unit tests; thumbnail cache invalidation; aggregate counts
-- Acceptance: queries return expected ids; thumbnails cached; aggregates correct on fixtures
+- [ ] Shared schemas and ports
+  - Add `packages/shared/src/filters.ts` (Zod `FilterChain`, `FilterNode`, `Connector`, `NodeMode`)
+  - Add `packages/shared/src/contracts/search.ts`, `aggregations.ts`, `thumbnails.ts`
+  - Add ports: `packages/shared/src/ports/query.ts`, `aggregations.ts`, `thumbnails.ts`
+- [ ] Query builder (pure) in `server/src/services/queryBuilder.ts`
+  - Node SQL (any/all) and CTE combination (INTERSECT/UNION/EXCEPT); parameterized
+- [ ] DB indexes for search/sort (migration)
+  - Index `files.taken_at` (and consider `files.mtime`, `files.size`) for perf budgets
+- [ ] Query execution service in `server/src/services/query.ts`
+  - Execute `FilterChain` with paging/sort; return ids + lightweight fields
+- [ ] `POST /api/files/search` route
+  - Validate with shared schemas; wire into `app.ts`
+- [ ] Thumbnails service `server/src/services/thumbnails.ts` using `sharp`
+  - Disk cache by `file_id + mtime + size + format`; config in shared `config.ts`
+- [ ] `GET /api/files/:id/thumbnail` route
+  - Validate query (`size`, `format`); serve cached bytes with headers
+- [ ] Aggregations service `server/src/services/aggregations.ts`
+  - Selection via `FilterChain`; Source via roots/signature; SQL grouping
+- [ ] `POST /api/tags/aggregate` route
+  - Body `{ scope, filter?, roots? }`; returns counts; validate with shared schema
+- [ ] Tests
+  - Query builder unit tests; service tests (query/aggregations); route tests (search/thumbnail/aggregate)
+  - Thumbnail cache invalidation on `mtime` change; output dimensions/format
+- [ ] Acceptance: search returns expected ids; thumbnails cached; aggregates correct on fixtures; coarse perf within budgets
 
 ### Workpackages: Phase 4 — Tags, groups, and application semantics
 

@@ -104,6 +104,7 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - Server workspace install: `npm --workspace @phoTool/server install --no-audit --no-fund`
 - Shared build: `npm --workspace @phoTool/shared run build`
 - Run tests: `npm run server:test` (and web tests when present)
+  - Ensure shared schema/contract tests are included (under `server/test`)
 - If DB schema changed: generate and migrate locally
 - If decisions or scope changed: update ADRs/EHs/plan
 - No `console.*` in prod code; use logger

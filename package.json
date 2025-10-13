@@ -13,7 +13,7 @@
     "lint:ci": "eslint . --max-warnings=0",
     "prepare": "husky",
     "depcruise": "depcruise --config .dependency-cruiser.cjs .",
-    "type-check": "tsc -p tsconfig.base.json --noEmit || true",
+    "type-check": "tsc -p tsconfig.base.json --noEmit",
     "server:dev": "npm --workspace @phoTool/server run dev",
     "server:build": "npm --workspace @phoTool/server run build",
     "server:start": "npm --workspace @phoTool/server run start",

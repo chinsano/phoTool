@@ -5,6 +5,13 @@ export const exiftoolConfigSchema = z.object({
   maxConcurrent: z.number().int().positive().default(2),
 });
 
+export const thumbnailsConfigSchema = z.object({
+  defaultSize: z.number().int().positive().default(512),
+  quality: z.number().int().min(1).max(100).default(80),
+  format: z.enum(['jpeg', 'webp', 'png']).default('jpeg'),
+  cacheDir: z.string().min(1).default('data/thumbnails'),
+});
+
 export const appConfigSchema = z.object({
   defaultSourceDir: z.string().min(0).default(''),
   logLevel: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
@@ -25,7 +32,8 @@ export const appConfigSchema = z.object({
     extensions: z.array(z.string()).default(['.jpg', '.jpeg', '.png', '.heic', '.mp4', '.mov']),
     concurrency: z.number().int().positive().default(1),
     statusRetentionMs: z.number().int().positive().default(5 * 60 * 1000)
-  }).default({})
+  }).default({}),
+  thumbnails: thumbnailsConfigSchema.default({}),
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;

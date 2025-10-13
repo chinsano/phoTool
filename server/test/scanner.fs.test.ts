@@ -30,8 +30,9 @@ describe('scanner FS utilities', () => {
   it('lists files with sidecar mtime', () => {
     const listed = listFiles([tmpDir], ['.jpg']);
     expect(listed.length).toBe(1);
-    expect(listed[0].path.endsWith('img1.jpg')).toBe(true);
-    expect(listed[0].xmpMtime).not.toBeNull();
+    const file = listed.at(0)!;
+    expect(file.path.endsWith('img1.jpg')).toBe(true);
+    expect(file.xmpMtime).not.toBeNull();
   });
 
   it('diffs adds, updates, and deletes', () => {
