@@ -1,0 +1,19 @@
+{
+  "defaultSourceDir": "",
+  "logLevel": "info",
+  "exiftool": {
+    "taskTimeoutMs": 20000,
+    "maxConcurrent": 2
+  },
+  "exif": {
+    "writeMode": "sidecar-only",
+    "readPreference": "sidecar-first"
+  },
+  "sync": {
+    "autoImportOnSourceChange": false,
+    "autoWriteOnTagChange": false,
+    "allowManualImport": true,
+    "allowManualWrite": true
+  }
+}
+

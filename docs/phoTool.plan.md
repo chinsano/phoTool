@@ -276,12 +276,18 @@
   - Acceptance: CI green with migrations applied
 
 4) ExifTool service (stay-open) with read/write helpers
-- [ ] Install `exiftool-vendored` and create `server/src/services/exiftool.ts`
-- [ ] Implement start/stop lifecycle and a `readMetadata(filePath)` helper
-- [ ] Implement write helpers for tags: flat `dc:Subject` and hierarchical `lr:HierarchicalSubject` to sidecar
-- [ ] Add a small fixture directory and tests that mock the exiftool process for CI
-- [ ] Provide mapping utils between DB tags and XMP fields
-- Acceptance: unit tests for `readMetadata` (mocked) and mapping pass; manual run against a sample file succeeds locally
+- [x] Define shared port and schemas: `packages/shared/src/ports/exiftool.ts` (Zod)
+- [x] ADR: Exif/XMP policy (sidecar-first, embedded opt-in, delimiter conventions)
+- [x] Install `exiftool-vendored`; scaffold `server/src/services/exiftool/index.ts`
+- [x] Implement start/stop lifecycle; bounded queue and concurrency cap (configurable)
+- [x] Add command timeout (configurable)
+- [x] Enforce ExifTool argument allowlist and path normalization
+- [x] Implement `readMetadata(filePath)` → typed minimal fields (subjects, hierarchicalSubjects, takenAt, lat, lon, width, height, duration)
+- [x] Implement `writeSubjects(filePath, subjects: string[])` to `dc:Subject` (sidecar-only)
+- [x] Implement `writeHierarchicalSubjects(filePath, paths: string[][])` to `lr:HierarchicalSubject` ("|"-delimited levels, sidecar-only)
+- [x] Add pure mapping utils between DB tags and XMP subjects/hierarchical tokens
+- [x] Unit tests mocking the exiftool process (CI-safe)
+- Acceptance: mapping and service tests (mocked) green; allowlist/timeout/concurrency covered; optional local smoke succeeds
 
 ### Workpackages: Phase 2 — Incremental scanner and scan API
 

@@ -12,3 +12,5 @@ export * from './contracts/health.js';
 export * from './db/file.js';
 export * from './db/tag.js';
 export * from './db/fileTag.js';
+export * from './ports/exiftool.js';
+export * from './config.js';
