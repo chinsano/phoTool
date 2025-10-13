@@ -6,6 +6,12 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/**/*.test.ts'],
+    exclude: [],
+    deps: {
+      inline: [/@phoTool\/shared/]
+    },
+    hookTimeout: 10000,
+    testTimeout: 10000,
   },
 });
 

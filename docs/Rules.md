@@ -108,7 +108,7 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - If DB schema changed: generate and migrate locally
 - If decisions or scope changed: update ADRs/EHs/plan
 - No `console.*` in prod code; use logger
-- Update plan: mark relevant TODOs complete in `docs/phoTool.plan.md`
+- Update plan: mark relevant TODOs complete in `docs/phoTool.plan.md` (REQUIRED when touching `packages/shared/` or `server/src/`)
 - Review this checklist itself and update it if new functionality introduces additional checks (e.g., new workspaces, Storybook build/tests, E2E)
 
 Local enforcement

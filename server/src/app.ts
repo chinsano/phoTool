@@ -6,9 +6,12 @@ import pinoHttp from 'pino-http';
 
 import { logger } from './logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { createAggregationsRouter } from './routes/aggregations.js';
+import { createFilesRouter } from './routes/files.js';
 import { createHealthRouter } from './routes/health.js';
 import { createScanRouter } from './routes/scan.js';
 import { createSyncRouter } from './routes/sync.js';
+import { createThumbnailsRouter } from './routes/thumbnails.js';
 
 export function createApp(options?: { port?: number }) {
   const app = express();
@@ -23,6 +26,9 @@ export function createApp(options?: { port?: number }) {
   app.use('/api/health', createHealthRouter());
   app.use('/api/sync', createSyncRouter());
   app.use('/api/scan', createScanRouter());
+  app.use('/api/files', createFilesRouter());
+  app.use('/api/files', createThumbnailsRouter());
+  app.use('/api/tags', createAggregationsRouter());
 
   // Unknown API routes → JSON 404
   app.use('/api', (_req, res) => {

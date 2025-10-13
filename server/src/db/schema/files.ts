@@ -25,6 +25,9 @@ export const files = sqliteTable(
     filesPathUnique: uniqueIndex('files_path_unique').on(t.path),
     filesDirIdx: index('files_dir_idx').on(t.dir),
     filesExtNameIdx: index('files_ext_name_idx').on(t.ext, t.name),
+    filesTakenAtIdx: index('files_taken_at_idx').on(t.takenAt),
+    filesMtimeIdx: index('files_mtime_idx').on(t.mtime),
+    filesSizeIdx: index('files_size_idx').on(t.size),
   })
 );
 
