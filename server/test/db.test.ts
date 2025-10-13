@@ -27,12 +27,15 @@ describe('DB schema constraints', () => {
       name: 'Holiday', slug: 'holiday', source: 'user',
     }).returning({ id: tags.id });
 
-    await db.insert(fileTags).values({ fileId: fileId.id, tagId: tagId.id });
-    const linked = await db.select().from(fileTags).where(eq(fileTags.fileId, fileId.id));
+    const fileIdVal = fileId!.id;
+    const tagIdVal = tagId!.id;
+
+    await db.insert(fileTags).values({ fileId: fileIdVal, tagId: tagIdVal });
+    const linked = await db.select().from(fileTags).where(eq(fileTags.fileId, fileIdVal));
     expect(linked.length).toBe(1);
 
-    await db.delete(files).where(eq(files.id, fileId.id));
-    const linkedAfterDelete = await db.select().from(fileTags).where(eq(fileTags.tagId, tagId.id));
+    await db.delete(files).where(eq(files.id, fileIdVal));
+    const linkedAfterDelete = await db.select().from(fileTags).where(eq(fileTags.tagId, tagIdVal));
     expect(linkedAfterDelete.length).toBe(0);
   });
 
