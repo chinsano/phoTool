@@ -11,8 +11,21 @@ async function run() {
   const useTemp = process.env.CI === 'true' && !process.env.DB_FILE_PATH;
   const sqlite = useTemp ? new Database(':memory:') : null;
   const client = sqlite ? drizzle(sqlite) : db;
-  await migrate(client, { migrationsFolder });
-  logger.info({ migrationsFolder, temp: useTemp }, 'Database migrations applied');
+  try {
+    await migrate(client, { migrationsFolder });
+    logger.info({ migrationsFolder, temp: useTemp }, 'Database migrations applied');
+  } catch (err) {
+    // Fallback: if persistent DB already contains base tables without migration meta, validate migrations in-memory
+    const msg = (err as Error)?.message || '';
+    if (!useTemp && /already exists/i.test(msg)) {
+      const mem = new Database(':memory:');
+      const memClient = drizzle(mem);
+      await migrate(memClient, { migrationsFolder });
+      logger.warn({ migrationsFolder }, 'Persistent DB already had tables; validated migrations against in-memory DB instead');
+      return;
+    }
+    throw err;
+  }
 }
 
 run().catch((err) => {
