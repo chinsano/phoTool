@@ -41,6 +41,9 @@ jobs:
       - name: Server - generate migrations
         run: npm --workspace @phoTool/server run db:generate
 
+      - name: Shared - build
+        run: npm --workspace @phoTool/shared run build
+
       - name: Server - build
         run: npm --workspace @phoTool/server run build
 
