@@ -1,6 +1,6 @@
 import { integer, sqliteTable, text, primaryKey } from 'drizzle-orm/sqlite-core';
 
-import { tags } from './tags';
+import { tags } from './tags.js';
 
 export const tagGroups = sqliteTable('tag_groups', {
   id: integer('id').primaryKey({ autoIncrement: true }),

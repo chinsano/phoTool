@@ -1,7 +1,7 @@
 import { integer, sqliteTable, index, primaryKey } from 'drizzle-orm/sqlite-core';
 
-import { files } from './files';
-import { tags } from './tags';
+import { files } from './files.js';
+import { tags } from './tags.js';
 
 export const fileTags = sqliteTable(
   'file_tags',

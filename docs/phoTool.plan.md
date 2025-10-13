@@ -274,6 +274,9 @@
 - [x] CI integration
   - Update CI to run `npm run -w server db:migrate` before server tests
   - Acceptance: CI green with migrations applied
+- [x] ES module imports for schema files
+  - Fixed relative imports in schema files to include `.js` extension for Node.js ES module compatibility
+  - Acceptance: server starts without module resolution errors; all tests pass
 
 4) ExifTool service (stay-open) with read/write helpers
 - [x] Define shared port and schemas: `packages/shared/src/ports/exiftool.ts` (Zod)
