@@ -1,0 +1,1 @@
+{"defaultSourceDir":"C:/Photos","logLevel":"debug","exiftool":{"taskTimeoutMs":5000,"maxConcurrent":3},"exif":{"writeMode":"both","readPreference":"embedded-first"},"sync":{"autoImportOnSourceChange":false,"autoWriteOnTagChange":false,"allowManualImport":true,"allowManualWrite":true}}

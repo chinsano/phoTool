@@ -13,4 +13,5 @@ export * from './db/file.js';
 export * from './db/tag.js';
 export * from './db/fileTag.js';
 export * from './ports/exiftool.js';
+export * from './ports/scanner.js';
 export * from './config.js';

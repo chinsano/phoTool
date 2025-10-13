@@ -17,7 +17,8 @@
     "server:dev": "npm --workspace @phoTool/server run dev",
     "server:build": "npm --workspace @phoTool/server run build",
     "server:start": "npm --workspace @phoTool/server run start",
-    "server:test": "npm --workspace @phoTool/server run test"
+    "server:test": "npm --workspace @phoTool/server run test",
+    "test:ci": "npm --workspace @phoTool/server run test"
   },
   "engines": {
     "node": ">=20"

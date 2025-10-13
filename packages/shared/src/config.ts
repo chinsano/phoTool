@@ -18,6 +18,13 @@ export const appConfigSchema = z.object({
     autoWriteOnTagChange: z.boolean().default(false),
     allowManualImport: z.boolean().default(true),
     allowManualWrite: z.boolean().default(true)
+  }).default({}),
+  scanner: z.object({
+    followSymlinks: z.boolean().default(false),
+    ignoreGlobs: z.array(z.string()).default([]),
+    extensions: z.array(z.string()).default(['.jpg', '.jpeg', '.png', '.heic', '.mp4', '.mov']),
+    concurrency: z.number().int().positive().default(1),
+    statusRetentionMs: z.number().int().positive().default(5 * 60 * 1000)
   }).default({})
 });
 

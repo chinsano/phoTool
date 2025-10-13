@@ -7,6 +7,7 @@ import pinoHttp from 'pino-http';
 import { logger } from './logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { createHealthRouter } from './routes/health.js';
+import { createScanRouter } from './routes/scan.js';
 import { createSyncRouter } from './routes/sync.js';
 
 export function createApp(options?: { port?: number }) {
@@ -21,6 +22,7 @@ export function createApp(options?: { port?: number }) {
 
   app.use('/api/health', createHealthRouter());
   app.use('/api/sync', createSyncRouter());
+  app.use('/api/scan', createScanRouter());
 
   // Unknown API routes → JSON 404
   app.use('/api', (_req, res) => {

@@ -291,14 +291,26 @@
 
 ### Workpackages: Phase 2 — Incremental scanner and scan API
 
-- [ ] Implement `server/src/services/scanner.ts`
-  - Compute normalized source signature (sorted, normalized paths → sha1)
-  - Walk directories; capture (`size`,`mtime`) and sidecar `xmp_mtime`
-  - Detect adds/updates/deletes; update DB tables; no ExifTool read if unchanged
-- [ ] Add `POST /api/scan { roots, mode?: 'auto'|'full' }` and `GET /api/scan/status`
-  - Queue long-running scan; status provides progress (files scanned/total)
-- [ ] Tests with `mock-fs` for add/update/delete and signature unchanged fast path
-- Acceptance: scan auto-mode skips unchanged; status reports progress; DB reflects file set
+- [x] Shared contracts and port
+  - `packages/shared/src/ports/scanner.ts`: Zod schemas for `ScanMode`, `ScanRequest`, `ScanId`, `ScanStatus`, `ScanResult`; export `ScannerPort`.
+  - Export via `packages/shared/src/index.ts`.
+- [x] DB support for source signatures
+  - Add `server/src/db/schema/sources.ts` table: `id`, `signature UNIQUE`, `roots_json`, `last_scanned_at`.
+  - Export from `server/src/db/schema/index.ts`; migration generated in follow-up.
+- [x] Pure FS-diff utilities (no DB writes)
+  - `server/src/services/scanner/fs.ts`: `normalizePaths`, `computeSignature`, `listFiles`, `diffAgainstDb` (adds/updates/deletes using `path`/`xmp_mtime`).
+  - Tests with `mock-fs`: add/update/delete, sidecar-only change, unchanged fast path.
+- [x] Scanner service (DB-apply layer)
+  - `server/src/services/scanner/index.ts`: apply diff to `files` table; maintain tombstones for deletes; update `sources` by signature; skip when `mode='auto'` and unchanged.
+  - Uses injected DB client and `logger`; no ExifTool reads in this phase.
+- [x] In-memory job queue and status tracking
+  - Single-flight queue; `ScanStatus` exposes `queued|running|completed|failed`, `scanned/total`, timestamps, error.
+- [x] HTTP routes (adapter)
+  - `server/src/routes/scan.ts`: `POST /api/scan` (start) and `GET /api/scan/status` (poll). Validate with shared Zod.
+  - Wire into `server/src/app.ts`.
+- [x] Config surface
+  - Extend `packages/shared/src/config.ts` with `scanner` defaults: `followSymlinks`, `ignoreGlobs[]`, `extensions[]`, `concurrency`, `statusRetentionMs`.
+- Acceptance: `POST /api/scan` enqueues and returns `scanId`; `GET /api/scan/status` reports progress; auto-mode skips unchanged signatures; DB reflects adds/updates/deletes on fixtures; unit tests for FS-diff and routes pass.
 
 ### Workpackages: Phase 3 — Search, thumbnails, and aggregations
 
