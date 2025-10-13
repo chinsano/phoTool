@@ -246,32 +246,32 @@
 – Acceptance: lint + type-check pass; tests green; `curl http://127.0.0.1:5000/api/health` → 200 with schema-valid JSON; static files served if `web/dist` exists
 
 3) Database: Drizzle + better-sqlite3, schemas, migrations, and tests
-- [ ] Shared DB row schemas (Zod) in `packages/shared/src/db/` and exported via `packages/shared/src/index.ts`
+- [x] Shared DB row schemas (Zod) in `packages/shared/src/db/` and exported via `packages/shared/src/index.ts`
   - Files, Tags, FileTags schemas and derived types
   - Acceptance: unit tests parse a valid and an invalid row per entity
-- [ ] Install Drizzle, better-sqlite3, and CLI; add `server/drizzle.config.ts`
+- [x] Install Drizzle, better-sqlite3, and CLI; add `server/drizzle.config.ts`
   - Scripts in `server/package.json`: `db:generate`, `db:migrate`, `db:studio` (optional)
   - Acceptance: `npm run -w server db:generate` produces migrations
-- [ ] Define Drizzle tables with keys and indices
+- [x] Define Drizzle tables with keys and indices
   - `files`: `id PK`, `path UNIQUE`, `dir`, `name`, `ext`, `size`, `mtime`, `ctime`, `width`, `height`, `duration`, `lat`, `lon`, `taken_at`, `xmp_path NULL`, `xmp_mtime NULL`, `last_indexed_at`; indices on `dir`, `(ext,name)`
   - `tags`: `id PK`, `name`, `slug UNIQUE`, `color`, `group`, `parent_id NULL`, `source ENUM('user','auto')`
   - `file_tags`: `(file_id, tag_id) PK`, FKs with `ON DELETE CASCADE`; index `(tag_id, file_id)`
   - Acceptance: generated SQL includes FKs/indices/uniques as above
-- [ ] DB path/config and `data/` directory handling
+- [x] DB path/config and `data/` directory handling
   - `server/src/db/config.ts` reads env for `DB_FILE_PATH` or defaults to `data/phoTool.db`; ensures `data/` exists
   - Acceptance: after migrate, `data/phoTool.db` exists on disk
-- [ ] Migration runner and DB client
+- [x] Migration runner and DB client
   - `server/src/db/migrate.ts` applies migrations using better-sqlite3 + Drizzle migrator
   - `server/src/db/client.ts` exports a singleton Drizzle client
   - Acceptance: `npm run -w server db:migrate` succeeds on a fresh repo
-- [ ] Smoke query util
+- [x] Smoke query util
   - `server/src/db/smoke.ts` runs a simple query and logs via `server/src/logger.ts`
   - Acceptance: running the compiled script reports success
-- [ ] Unit tests with isolated DB
+- [x] Unit tests with isolated DB
   - Helper to create an in-memory or temp-file SQLite DB and apply migrations in tests
   - Tests: insert file, tag, link in `file_tags`; FK integrity (cascade), unique `tags.slug`
   - Acceptance: tests pass locally and in CI
-- [ ] CI integration
+- [x] CI integration
   - Update CI to run `npm run -w server db:migrate` before server tests
   - Acceptance: CI green with migrations applied
 

@@ -35,4 +35,19 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+      - name: Server - install workspace deps
+        run: npm --workspace @phoTool/server install --no-audit --no-fund
+
+      - name: Server - generate migrations
+        run: npm --workspace @phoTool/server run db:generate
+
+      - name: Server - build
+        run: npm --workspace @phoTool/server run build
+
+      - name: Server - migrate
+        run: npm --workspace @phoTool/server run db:migrate
+
+      - name: Server - tests
+        run: npm --workspace @phoTool/server run test
+
 
