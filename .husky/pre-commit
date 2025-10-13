@@ -2,3 +2,13 @@
 . "$(dirname -- "$0")/_/h"
 
 npx lint-staged
+
+# Enforce plan update when server/shared/docs ADRs change
+CHANGED_FILES=$(git diff --cached --name-only)
+if echo "$CHANGED_FILES" | grep -E -q '^(server/src/|server/drizzle/|packages/shared/src/|docs/adr/)'; then
+  if ! echo "$CHANGED_FILES" | grep -q '^docs/phoTool.plan.md$'; then
+    echo "\n[docs enforcement] You changed server/shared/docs ADRs but didn't stage docs/phoTool.plan.md." >&2
+    echo "Per Rules.md, mark relevant TODOs complete in docs/phoTool.plan.md in the same commit." >&2
+    exit 1
+  fi
+fi

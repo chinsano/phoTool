@@ -9,9 +9,17 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { createAggregationsRouter } from './routes/aggregations.js';
 import { createFilesRouter } from './routes/files.js';
 import { createHealthRouter } from './routes/health.js';
+import { createTagsRouter } from './routes/tags.js';
+import { createTagGroupsRouter } from './routes/tagGroups.js';
+import { createFileTagsRouter } from './routes/fileTags.js';
+import { createLibraryRouter } from './routes/library.js';
 import { createScanRouter } from './routes/scan.js';
 import { createSyncRouter } from './routes/sync.js';
 import { createThumbnailsRouter } from './routes/thumbnails.js';
+import { createTagsRouter } from './routes/tags.js';
+import { createTagGroupsRouter } from './routes/tagGroups.js';
+import { createFileTagsRouter } from './routes/fileTags.js';
+import { createLibraryRouter } from './routes/library.js';
 
 export function createApp(options?: { port?: number }) {
   const app = express();
@@ -28,6 +36,13 @@ export function createApp(options?: { port?: number }) {
   app.use('/api/scan', createScanRouter());
   app.use('/api/files', createFilesRouter());
   app.use('/api/files', createThumbnailsRouter());
+  app.use('/api/files', createFileTagsRouter());
+  app.use('/api/library', createLibraryRouter());
+  app.use('/api/tags', createTagsRouter());
+  app.use('/api/tag-groups', createTagGroupsRouter());
+  // Preferred mount for aggregations
+  app.use('/api/aggregations', createAggregationsRouter());
+  // Temporary alias for backward compatibility
   app.use('/api/tags', createAggregationsRouter());
 
   // Unknown API routes → JSON 404

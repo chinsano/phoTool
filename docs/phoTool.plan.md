@@ -341,13 +341,30 @@
 
 ### Workpackages: Phase 4 — Tags, groups, and application semantics
 
-- [ ] Tag groups tables and CRUD: `GET/POST /api/tag-groups`; items add/remove endpoints
-- [ ] Tag CRUD: `GET/POST /api/tags` (create/rename/color)
-- [ ] Tag application endpoints:
-  - `POST /api/files/:id/tags` and `POST /api/files/tags` (batch) with add/remove/set
-- [ ] Library delete semantics implemented server-side (group unlink and selection removal)
-- [ ] Tests cover group membership, batch apply/remove, and semantics
-- Acceptance: API operations match rules; tests pass
+- [x] Shared contracts and ports (packages/shared)
+  - Zod schemas: Tag CRUD, Tag Groups, Tag Application (`mode: 'add'|'remove'|'set'`)
+  - Ports: `TagsPort`, `TagGroupsPort`, `TagApplicationPort`
+- [x] DB schema and migrations for groups
+  - Tables: `tag_groups(id, name)`, `tag_group_items(group_id, tag_id)` with FKs and uniques
+- [x] Routes mount adjustment (avoid collisions)
+  - Move aggregations under `/api/aggregations` (keep `/api/tags/aggregate` alias temporarily)
+  - Document via ADR-0002; update plan references
+- [x] Tag CRUD (service + routes)
+  - `GET /api/tags`, `POST /api/tags` (create), `PUT /api/tags/:id` (rename/color)
+- [x] Tag Groups CRUD and membership (service + routes)
+  - `GET /api/tag-groups`, `POST /api/tag-groups`
+  - `POST /api/tag-groups/:id/items` (add/remove tag ids)
+- [x] File tag application (service + routes)
+  - `POST /api/files/:id/tags` (single)
+  - `POST /api/files/tags` (batch) with `mode: add|remove|set`
+- [x] Library delete semantics
+  - Implement group unlink (does not delete tag entity)
+  - Implement selection removal by explicit ids or resolved from a FilterChain
+- [x] Logging, validation, typed errors
+  - Use shared schemas for validation; no ad-hoc DTOs; no `console.*`
+- [x] Tests (unit + route)
+  - Cover CRUD, group membership, apply/remove/set, and delete semantics
+- Acceptance: migrations apply cleanly; APIs match Rules; tests green
 
 ### Workpackages: Phase 5 — Placeholder resolver and offline geocoder
 
