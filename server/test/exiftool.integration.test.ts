@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { ExifToolService } from '../src/services/exiftool/index.js';
 import { fileURLToPath } from 'node:url';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
+import { ExifToolService } from '../src/services/exiftool/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

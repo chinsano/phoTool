@@ -1,10 +1,11 @@
-import { ExifTool } from 'exiftool-vendored';
 import type { ExifToolPort, ReadMetadataResult } from '@phoTool/shared';
-import { logger } from '../../logger.js';
-import path from 'node:path';
+import { ExifTool } from 'exiftool-vendored';
 import fs from 'node:fs';
+import path from 'node:path';
+
 import { fromHierarchicalSubjectStrings, normalizeSubjects, toHierarchicalSubjectStrings } from './mapping.js';
 import { parseExifDateTimeOriginal } from './parse.js';
+import { logger } from '../../logger.js';
 
 // Basic scaffold; guards and mapping filled in subsequent tasks
 export class ExifToolService implements ExifToolPort {
@@ -38,10 +39,10 @@ export class ExifToolService implements ExifToolPort {
     const safePath = ExifToolService.normalizeAndValidatePath(filePath);
     const sidecar = ExifToolService.sidecarPathFor(safePath);
     const readPath = fs.existsSync(sidecar) ? sidecar : safePath;
-    const tags = (await this.schedule(() => this.exiftool.read(readPath))) as any;
-    const subjects = normalizeSubjects((tags.Subject as string[] | undefined));
-    const hierarchical = fromHierarchicalSubjectStrings((tags.HierarchicalSubject as string[] | undefined));
-    const takenAt = parseExifDateTimeOriginal(tags.DateTimeOriginal as unknown);
+    const tags: Record<string, unknown> = await this.schedule(() => this.exiftool.read(readPath) as Promise<Record<string, unknown>>);
+    const subjects = normalizeSubjects(tags.Subject as string[] | undefined);
+    const hierarchical = fromHierarchicalSubjectStrings(tags.HierarchicalSubject as string[] | undefined);
+    const takenAt = parseExifDateTimeOriginal(tags.DateTimeOriginal);
     const width = (tags.ImageWidth as number | undefined) ?? null;
     const height = (tags.ImageHeight as number | undefined) ?? null;
     const durationSec = (tags.Duration as number | undefined) ?? null;

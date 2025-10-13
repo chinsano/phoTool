@@ -1,7 +1,9 @@
 import { Router } from 'express';
+
 import { loadConfig } from '../config.js';
-import { ExifToolService } from '../services/exiftool/index.js';
 import { logger } from '../logger.js';
+import { ExifToolService } from '../services/exiftool/index.js';
+
 
 export function createSyncRouter() {
   const router = Router();

@@ -1,6 +1,6 @@
+import { appConfigSchema, type AppConfig, defaultConfig } from '@phoTool/shared';
 import fs from 'node:fs';
 import path from 'node:path';
-import { appConfigSchema, type AppConfig, defaultConfig } from '@phoTool/shared';
 
 const ROOT_FILE = 'phoTool.config.json';
 

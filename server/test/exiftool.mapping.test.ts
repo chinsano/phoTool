@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import { fromHierarchicalSubjectStrings, toHierarchicalSubjectStrings, normalizeSubjects } from '../src/services/exiftool/mapping.js';
 
 describe('exiftool mapping utils', () => {

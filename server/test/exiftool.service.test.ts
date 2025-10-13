@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { ExifToolService } from '../src/services/exiftool/index.js';
 
 vi.mock('exiftool-vendored', () => {
   class MockExifTool {
     async version() { return '12.0'; }
     async end() { /* noop */ }
-    async read(_path: string) {
+    async read() {
       return {
         Subject: ['A', 'B'],
         HierarchicalSubject: ['People|Family|Alice'],
@@ -15,9 +16,9 @@ vi.mock('exiftool-vendored', () => {
         Duration: 1.5,
         GPSLatitude: 1.23,
         GPSLongitude: 4.56,
-      } as any;
+      } as unknown as Record<string, unknown>;
     }
-    async write(_path: string, _tags: any, _args: string[]) { /* noop */ }
+    async write() { /* noop */ }
   }
   return { ExifTool: MockExifTool };
 });

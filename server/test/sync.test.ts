@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import request from 'supertest';
-import { createApp } from '../src/app.js';
 import fs from 'node:fs';
 import path from 'node:path';
+import request from 'supertest';
+import { describe, it, expect } from 'vitest';
+
+import { createApp } from '../src/app.js';
 
 function b64Fixture(name: string): string {
   return fs.readFileSync(path.resolve(__dirname, 'fixtures', 'exif', `${name}.jpg.b64`), 'utf8');

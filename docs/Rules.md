@@ -95,6 +95,20 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - [ ] Components are pure; side effects live in hooks/services
 - [ ] Tutorials updated or verified
 - [ ] If a workaround was needed, added an ADR or performed a refactor first
+- [ ] Reviewed/updated Pre-commit checklist if functionality adds new required checks
+
+## Pre-commit checklist (local)
+- Run type-check: `npm run type-check`
+- Run ESLint (zero warnings): `npm run lint:ci`
+- Run tests: `npm run server:test` (and web tests when present)
+- If DB schema changed: generate and migrate locally
+- If decisions or scope changed: update ADRs/EHs/plan
+- No `console.*` in prod code; use logger
+- Review this checklist itself and update it if new functionality introduces additional checks (e.g., new workspaces, Storybook build/tests, E2E)
+
+Local enforcement
+- Pre-commit: runs lint-staged (`eslint --fix` and zero-warnings) on staged files
+- Pre-push: runs type-check, `lint:ci`, and tests across the repo
 
 ## Atomic UI workflow ("button zoo" first)
 
