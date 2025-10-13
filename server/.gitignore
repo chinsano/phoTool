@@ -1,0 +1,7 @@
+# Test-run temp outputs and caches (server workspace only)
+/tmp-exif-*/
+/tmp-sync-*/
+/tmp-cfg-*/
+/data/thumbnails/
+/server.log*
+/dist/
