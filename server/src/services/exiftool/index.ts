@@ -62,7 +62,7 @@ export class ExifToolService implements ExifToolPort {
     const sidecar = ExifToolService.sidecarPathFor(safePath);
     const allowed = subjects.map(String);
     const args = ExifToolService.ensureAllowedArgs(['-overwrite_original']);
-    await this.schedule(() => this.exiftool.write(sidecar, { 'XMP-dc:Subject': allowed }, args));
+    await this.schedule(() => this.exiftool.write(sidecar, { Subject: allowed }, args));
   }
 
   async writeHierarchicalSubjects(filePath: string, paths: string[][]): Promise<void> {
@@ -70,21 +70,21 @@ export class ExifToolService implements ExifToolPort {
     const sidecar = ExifToolService.sidecarPathFor(safePath);
     const flat = toHierarchicalSubjectStrings(paths);
     const args = ExifToolService.ensureAllowedArgs(['-overwrite_original']);
-    await this.schedule(() => this.exiftool.write(sidecar, { 'XMP-lr:HierarchicalSubject': flat }, args));
+    await this.schedule(() => this.exiftool.write(sidecar, { HierarchicalSubject: flat }, args));
   }
 
   async writeEmbeddedSubjects(filePath: string, subjects: string[]): Promise<void> {
     const safePath = ExifToolService.normalizeAndValidatePath(filePath);
     const allowed = subjects.map(String);
     const args = ExifToolService.ensureAllowedArgs(['-overwrite_original']);
-    await this.schedule(() => this.exiftool.write(safePath, { 'XMP-dc:Subject': allowed }, args));
+    await this.schedule(() => this.exiftool.write(safePath, { Subject: allowed }, args));
   }
 
   async writeEmbeddedHierarchicalSubjects(filePath: string, paths: string[][]): Promise<void> {
     const safePath = ExifToolService.normalizeAndValidatePath(filePath);
     const flat = toHierarchicalSubjectStrings(paths);
     const args = ExifToolService.ensureAllowedArgs(['-overwrite_original']);
-    await this.schedule(() => this.exiftool.write(safePath, { 'XMP-lr:HierarchicalSubject': flat }, args));
+    await this.schedule(() => this.exiftool.write(safePath, { HierarchicalSubject: flat }, args));
   }
 
   static normalizeAndValidatePath(inputPath: string): string {

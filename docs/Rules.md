@@ -98,12 +98,16 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - [ ] Reviewed/updated Pre-commit checklist if functionality adds new required checks
 
 ## Pre-commit checklist (local)
+- Run ESLint: `npm run lint` (and zero warnings: `npm run lint:ci`)
+- Run dependency rules: `npm run depcruise`
 - Run type-check: `npm run type-check`
-- Run ESLint (zero warnings): `npm run lint:ci`
+- Server workspace install: `npm --workspace @phoTool/server install --no-audit --no-fund`
+- Shared build: `npm --workspace @phoTool/shared run build`
 - Run tests: `npm run server:test` (and web tests when present)
 - If DB schema changed: generate and migrate locally
 - If decisions or scope changed: update ADRs/EHs/plan
 - No `console.*` in prod code; use logger
+- Update plan: mark relevant TODOs complete in `docs/phoTool.plan.md`
 - Review this checklist itself and update it if new functionality introduces additional checks (e.g., new workspaces, Storybook build/tests, E2E)
 
 Local enforcement
