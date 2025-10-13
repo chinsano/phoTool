@@ -8,3 +8,4 @@ export interface SampleType {
 }
 
 
+export * from './contracts/health';

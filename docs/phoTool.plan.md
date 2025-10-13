@@ -194,7 +194,7 @@
 
 ### To-dos
 
-- [ ] Initialize Node+TS monorepo, linting, tsconfig paths, pnpm or npm workspaces
+- [x] Initialize Node+TS monorepo, linting, tsconfig paths, pnpm or npm workspaces
 - [ ] Create Express server, health route, static web serving
 - [ ] Add Drizzle schema and migrations for files, tags
 - [ ] Implement stay-open ExifTool service with read/write helpers
@@ -224,21 +224,26 @@
 ### Workpackages: Phase 1 (granular)
 
 1) Initialize Node+TS monorepo, linting, tsconfig paths, workspaces
-- [ ] Create `package.json` with workspaces (`packages/*`, `server`, `web`) and scripts: `lint`, `type-check`, `depcruise`
-- [ ] Add `pnpm-workspace.yaml` (or npm workspaces) and lockfile
-- [ ] Add `tsconfig.base.json` with path aliases for `@shared/*` and strict options
-- [ ] Create minimal `packages/shared/` with tsconfig and a sample type to validate path mapping
-- [ ] Wire ESLint to TypeScript (uses `.eslintrc.cjs`), add `lint` script; ensure it runs
-- [ ] Add `depcruise` script and run against an empty structure (should pass)
+- [x] Create `package.json` with workspaces (`packages/*`, `server`, `web`) and scripts: `lint`, `type-check`, `depcruise`
+- [x] Add `pnpm-workspace.yaml` (or npm workspaces) and lockfile
+- [x] Add `tsconfig.base.json` with path aliases for `@shared/*` and strict options
+- [x] Create minimal `packages/shared/` with tsconfig and a sample type to validate path mapping
+- [x] Wire ESLint to TypeScript (uses `.eslintrc.cjs`), add `lint` script; ensure it runs
+- [x] Add `depcruise` script and run against an empty structure (should pass)
 - Acceptance: `npm run lint` passes; `npx depcruise` passes; `tsc -p tsconfig.base.json --noEmit` passes
 
 2) Server bootstrap: Express, health route, static serving
-- [ ] Scaffold `server/package.json` + `tsconfig.json`
-- [ ] Implement `server/src/index.ts` Express app with `GET /api/health -> { ok: true }`
-- [ ] Configure static serving from `/web/dist` (placeholder path for now)
-- [ ] Add scripts: `server:dev` (ts-node/tsx), `server:build` (tsc), `server:start`
-- [ ] Add unit test with supertest for `/api/health`
-- Acceptance: `npm run server:test` green; curl to `/api/health` returns 200 JSON
+- [x] Scaffold `server/` workspace: `package.json`, `tsconfig.json` (extends base; path aliases for `@shared/*`)
+- [x] Define shared contract: `packages/shared/src/contracts/health.ts` (Zod `HealthResponse`), export via `packages/shared/src/index.ts`
+- [x] Implement Express app split: `server/src/app.ts` (createApp) and `server/src/index.ts` (boot)
+- [x] Add `server/src/routes/health.ts` with `GET /api/health` returning `HealthResponse`
+- [x] Configure static serving of `web/dist` when present; return 404 JSON for unknown API routes
+- [x] Add `server/src/logger.ts` (pino) and use it in `index.ts`; no `console.*`
+- [x] Add error-handling middleware with typed error envelope (align with Rules)
+- [x] Tests: `server/test/health.test.ts` using supertest against `createApp()`
+- [x] Scripts (server): `dev` (tsx), `build` (tsc), `start` (node dist), `test` (vitest)
+- [x] Scripts (root): `server:dev`, `server:build`, `server:start`, `server:test`
+– Acceptance: lint + type-check pass; tests green; `curl http://127.0.0.1:5000/api/health` → 200 with schema-valid JSON; static files served if `web/dist` exists
 
 3) Database: Drizzle + better-sqlite3, schema and migrations for files/tags
 - [ ] Install Drizzle, better-sqlite3, and CLI; set up `drizzle.config.ts`

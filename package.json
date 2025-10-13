@@ -10,7 +10,11 @@
   "scripts": {
     "lint": "eslint .",
     "depcruise": "depcruise --config .dependency-cruiser.cjs .",
-    "type-check": "tsc -p tsconfig.base.json --noEmit || true"
+    "type-check": "tsc -p tsconfig.base.json --noEmit || true",
+    "server:dev": "npm --workspace @phoTool/server run dev",
+    "server:build": "npm --workspace @phoTool/server run build",
+    "server:start": "npm --workspace @phoTool/server run start",
+    "server:test": "npm --workspace @phoTool/server run test"
   },
   "engines": {
     "node": ">=20"

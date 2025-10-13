@@ -5,5 +5,9 @@ data/
 web/dist/
 server/dist/
 *.log
+server/server.log
+server/.server.pid
+coverage/
+Thumbs.db
 
 
