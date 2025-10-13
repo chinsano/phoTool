@@ -14,6 +14,5 @@ if echo "$CHANGED_FILES" | grep -E -q '^(server/src/|server/drizzle/|packages/sh
 fi
 
 # Run repo-wide gates early to catch CI failures before push
-npm run lint:ci || exit 1
-npm run type-check || exit 1
-npm run depcruise || exit 1
+# Mirror CI locally to avoid drift
+npm run verify:ci || exit 1
