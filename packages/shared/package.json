@@ -7,6 +7,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "zod": "^3.23.8"
   }

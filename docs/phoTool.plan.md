@@ -195,7 +195,7 @@
 ### To-dos
 
 - [x] Initialize Node+TS monorepo, linting, tsconfig paths, pnpm or npm workspaces
-- [ ] Create Express server, health route, static web serving
+- [x] Create Express server, health route, static web serving
 - [ ] Add Drizzle schema and migrations for files, tags
 - [ ] Implement stay-open ExifTool service with read/write helpers
 - [ ] Implement incremental scanner with source signatures and status endpoint

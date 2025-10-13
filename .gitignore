@@ -6,6 +6,7 @@ web/dist/
 server/dist/
 *.log
 server/server.log
+server/server.log.old
 server/.server.pid
 coverage/
 Thumbs.db
