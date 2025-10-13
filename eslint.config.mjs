@@ -42,8 +42,17 @@ export default [
         "warn",
         { prefer: "type-imports", disallowTypeAnnotations: false }
       ],
+      "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: false }],
 
       // Import hygiene
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "@PhoTool/shared", message: "Use @phoTool/shared (lowercase)" }
+          ]
+        }
+      ],
       "import/order": [
         "warn",
         {

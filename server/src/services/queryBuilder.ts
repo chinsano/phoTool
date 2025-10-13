@@ -1,4 +1,4 @@
-import type { FilterChain, FilterNode } from '@PhoTool/shared';
+import type { FilterChain, FilterNode } from '@phoTool/shared';
 
 export interface BuiltQuery {
   sql: string;
@@ -6,7 +6,7 @@ export interface BuiltQuery {
 
 function buildNodeCte(node: FilterNode, idx: number): string {
   const tableAlias = `ft${idx}`;
-  const numericTagIds = node.tagIds.map((id) => Number(id)).filter((n) => Number.isFinite(n));
+  const numericTagIds = node.tagIds.map((id: string) => Number(id)).filter((n: number) => Number.isFinite(n));
   if (numericTagIds.length === 0) {
     // No tags in node → produce empty result set CTE
     return `node_${idx} AS (SELECT 0 AS file_id WHERE 1=0)`;
