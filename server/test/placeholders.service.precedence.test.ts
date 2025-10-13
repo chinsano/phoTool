@@ -4,8 +4,8 @@ import path from 'node:path';
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 
 import { files } from '../src/db/schema/files.js';
+import * as bigdatacloud from '../src/services/placeholders/bigdatacloudGeocoder.js';
 import * as locationFromExif from '../src/services/placeholders/locationFromExif.js';
-import * as offline from '../src/services/placeholders/offlineGeocoder.js';
 
 vi.mock('../src/db/client.js', async () => {
   const Database = (await import('better-sqlite3')).default;
@@ -33,13 +33,13 @@ describe('PlaceholderResolver precedence', () => {
     vi.spyOn(locationFromExif, 'extractLocationFromExifText').mockReturnValue({ country: 'United Kingdom' });
     const out = await resolver.expand({ fileIds: [1], tokens: ['country'] });
     expect(out.expansions['1']).toContain('Country United Kingdom');
-    // Ensure offline geocoder not called when EXIF is present
-    const offlineSpy = vi.spyOn(offline, 'reverseGeocodeOffline');
-    expect(offlineSpy).not.toHaveBeenCalled();
+    // Ensure BigDataCloud geocoder not called when EXIF is present
+    const bigdatacloudSpy = vi.spyOn(bigdatacloud, 'reverseGeocodeBigDataCloud');
+    expect(bigdatacloudSpy).not.toHaveBeenCalled();
   });
 
-  it('falls back to offline when EXIF text missing', async () => {
-    vi.spyOn(offline, 'reverseGeocodeOffline').mockResolvedValue({ country: 'United Kingdom', source: 'offline' });
+  it('falls back to BigDataCloud when EXIF text missing', async () => {
+    vi.spyOn(bigdatacloud, 'reverseGeocodeBigDataCloud').mockResolvedValue({ country: 'United Kingdom', source: 'bigdatacloud' });
     const out = await resolver.expand({ fileIds: [1], tokens: ['country'] });
     expect(out.expansions['1']).toContain('Country United Kingdom');
   });

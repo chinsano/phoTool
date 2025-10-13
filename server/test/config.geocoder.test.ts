@@ -17,19 +17,36 @@ describe('config geocoder defaults and overrides', () => {
       const cfg = loadConfig(dir);
       expect(cfg.geocoder.enabled).toBe(true);
       expect(cfg.geocoder.precision).toBeGreaterThanOrEqual(0);
-      expect(cfg.geocoder.datasets.countryPolygons).toBe(false);
+      expect(cfg.geocoder.bigdatacloud.baseUrl).toBe('https://api.bigdatacloud.net/data/reverse-geocode-client');
+      expect(cfg.geocoder.bigdatacloud.timeoutMs).toBeGreaterThan(0);
+      expect(cfg.geocoder.bigdatacloud.retries).toBeGreaterThanOrEqual(0);
     });
   });
 
   it('parses overrides from config file', () => {
     withTempDir((dir) => {
       const file = path.join(dir, 'phoTool.config.json');
-      fs.writeFileSync(file, JSON.stringify({ geocoder: { enabled: false, precision: 4, datasets: { countryPolygons: true, geoNames: true } } }), 'utf8');
+      fs.writeFileSync(
+        file,
+        JSON.stringify({
+          geocoder: {
+            enabled: false,
+            precision: 4,
+            bigdatacloud: {
+              baseUrl: 'https://custom-api.example.com',
+              timeoutMs: 10000,
+              retries: 5,
+            },
+          },
+        }),
+        'utf8'
+      );
       const cfg = loadConfig(dir);
       expect(cfg.geocoder.enabled).toBe(false);
       expect(cfg.geocoder.precision).toBe(4);
-      expect(cfg.geocoder.datasets.countryPolygons).toBe(true);
-      expect(cfg.geocoder.datasets.geoNames).toBe(true);
+      expect(cfg.geocoder.bigdatacloud.baseUrl).toBe('https://custom-api.example.com');
+      expect(cfg.geocoder.bigdatacloud.timeoutMs).toBe(10000);
+      expect(cfg.geocoder.bigdatacloud.retries).toBe(5);
     });
   });
 });

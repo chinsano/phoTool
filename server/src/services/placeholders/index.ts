@@ -1,11 +1,12 @@
 import type { PlaceholderResolverPort } from '@phoTool/shared';
 import { inArray } from 'drizzle-orm';
 
+import { reverseGeocodeBigDataCloud } from './bigdatacloudGeocoder.js';
 import { expandFromTakenAt } from './date.js';
 import { extractLocationFromExifText } from './locationFromExif.js';
-import { reverseGeocodeOffline } from './offlineGeocoder.js';
 import { db } from '../../db/client.js';
 import { files } from '../../db/schema/files.js';
+import { logger } from '../../logger.js';
 
 function buildTagsFromDate(date: ReturnType<typeof expandFromTakenAt>): string[] {
   const out: string[] = [];
@@ -52,9 +53,12 @@ export const placeholderResolverService: PlaceholderResolverPort = {
         let loc = exifText;
 
         if (!loc.country && !loc.state && !loc.city && row.lat !== null && row.lon !== null) {
-          const offline = await reverseGeocodeOffline(row.lat, row.lon).catch(() => undefined);
-          if (offline) {
-            loc = { country: offline.country, state: offline.state, city: offline.city };
+          const online = await reverseGeocodeBigDataCloud(row.lat, row.lon).catch((err) => {
+            logger.error({ error: err instanceof Error ? err.message : String(err), fileId: row.id }, 'BigDataCloud geocoder failed');
+            return undefined;
+          });
+          if (online) {
+            loc = { country: online.country, state: online.state, city: online.city };
           }
         }
 

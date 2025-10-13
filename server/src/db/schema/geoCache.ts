@@ -10,7 +10,7 @@ export const geoCache = sqliteTable(
     country: text('country'),
     state: text('state'),
     city: text('city'),
-    source: text('source'), // 'exif' | 'offline'
+    source: text('source'), // 'exif' | 'bigdatacloud' | 'offline' (legacy)
     updatedAt: text('updated_at'),
   },
   (t) => ({

@@ -366,7 +366,7 @@
   - Cover CRUD, group membership, apply/remove/set, and delete semantics
 - Acceptance: migrations apply cleanly; APIs match Rules; tests green
 
-### Workpackages: Phase 5 — Placeholder resolver and offline geocoder
+### Workpackages: Phase 5 — Placeholder resolver and online geocoder
 
 1) Shared contracts and port
 - [x] Add `packages/shared/src/contracts/placeholders.ts` (Zod): `PlaceholderToken = 'year'|'month'|'day'|'weekday'|'country'|'state'|'city'`; `ExpandPlaceholderRequest { fileIds: number[]; tokens: PlaceholderToken[] }`; `ExpandPlaceholderResponse { expansions: Record<number, string[]> }`
@@ -391,18 +391,16 @@
 - [x] Tests: fixtures for mapping and missing fields
 - Acceptance: tests green; no I/O
 
-6) Offline geocoder adapter + datasets + cache layer
-- [ ] Data prep script: `scripts/fetch-geodata.ts` downloads/updates datasets under `data/geodata/` (Natural Earth admin-0; optional GeoNames cities/admin codes)
-- [ ] Preprocess: simplify country polygons to TopoJSON; build R-tree index for bbox prefilter; KD-tree for GeoNames nearest-city lookup
-- [x] Add `server/src/services/placeholders/offlineGeocoder.ts`: given `lat/lon` → apply precision → cache lookup → country via polygon → city/state via GeoNames (if enabled) → write-through cache
-- [x] Extend `packages/shared/src/config.ts` with `geocoder` settings: `enabled`, `precision`, `datasets.countryPolygons`, `datasets.geoNames`
-- [ ] Licensing docs: add attribution for GeoNames; list dataset versions in `docs/adr/ADR-0003-placeholder-geocoder.md`
-- [ ] Tests: known coords resolve deterministic country; city/state when datasets enabled; second call hits cache; dataset disabled path returns undefined
-- Acceptance: unit tests cover cache hit/miss, configuration flags, and deterministic outputs
+6) Online geocoder adapter (BigDataCloud) + cache layer
+- [x] Add `server/src/services/placeholders/bigdatacloudGeocoder.ts`: given `lat/lon` → apply precision → cache lookup → BigDataCloud API → write-through cache
+- [x] Extend `packages/shared/src/config.ts` with `geocoder` settings: `enabled`, `precision`, `bigdatacloud.baseUrl`, `bigdatacloud.timeoutMs`, `bigdatacloud.retries`
+- [x] No API key or rate limiting required (Fair Use Policy)
+- [x] Tests: known coords resolve deterministic country/city/state; second call hits cache; API failure path returns undefined
+- Acceptance: unit tests cover cache hit/miss, configuration flags, retry logic, and deterministic outputs
 
 7) PlaceholderResolver service (port adapter)
-- [x] Add `server/src/services/placeholders/index.ts`: compose date resolver, EXIF extractor, and offline geocoder; precedence `EXIF text → offline geocoder`; format canonical tag labels/slugs per ADR
-- [ ] Logging and typed errors per Rules; no `console.*`
+- [x] Add `server/src/services/placeholders/index.ts`: compose date resolver, EXIF extractor, and BigDataCloud geocoder; precedence `EXIF text → BigDataCloud geocoder`; format canonical tag labels/slugs per ADR
+- [x] Logging and typed errors per Rules; no `console.*`
 - [x] Tests: in-memory DB verifies precedence and caching behavior
 - Acceptance: tests green; strict types enforced
 
@@ -419,20 +417,22 @@
 - [x] Update this plan and link the ADR; ensure acceptance checks are listed
 - Acceptance: plan updated; pre-commit/pre-push gates pass
 
-11) Optional online geocoding fallback (dev-only)
-- [ ] Config flag `geocoder.online.enabled` (default false) and rate-limit settings
-- [ ] Implement `server/src/services/placeholders/onlineGeocoder.ts` calling Nominatim with custom User-Agent and backoff; disabled in portable builds and CI by default
-- [ ] Tests: MSW-stubbed responses for a few coords; 429/backoff behavior; disabled path returns undefined
-- Acceptance: online fallback only used when explicitly enabled; tests use mocks only; no network in CI
+11) Online geocoding implementation (BigDataCloud)
+- [x] Using BigDataCloud as primary geocoder (no API key, Fair Use Policy, administrative-level accuracy)
+- [x] Config includes `geocoder.enabled` (default true) and retry/timeout settings
+- [x] Implement `server/src/services/placeholders/bigdatacloudGeocoder.ts` with retry logic and cache integration
+- [x] Tests: MSW-stubbed responses for coords; retry/timeout behavior; network failure returns undefined
+- Acceptance: geocoder works out-of-box; tests use mocks only; no network in CI
 
 12) Phase 5 test coverage hardening
 - [x] Shared contracts: add `shared.placeholders.contract.test.ts` with valid/invalid round-trips
 - [x] Config: extend `config.test.ts` to cover `geocoder` defaults and overrides
 - [x] DB migration: add assertion that `geo_cache` table and unique index exist
-- [x] Service precedence: seed in-memory DB to verify `EXIF text → offline` order and token filtering
+- [x] Service precedence: seed in-memory DB to verify `EXIF text → BigDataCloud` order and token filtering
 - [x] Routes: expand supertest coverage (valid body → 200 shape; invalid tokens → 400; >1000 ids → 413)
 - [x] Determinism: stabilize and assert repeatability of outputs across two runs; keep perf checks non-timing-based
-- Acceptance: all new tests green locally; coverage includes contracts, config, DB presence, service precedence, route validation, and determinism
+- [x] Cache behavior: comprehensive tests for cache hit/miss, coordinate rounding, precision handling, and negative coordinates
+- Acceptance: all new tests green locally; coverage includes contracts, config, DB presence, service precedence, route validation, determinism, and cache behavior
 
 ### Workpackages: Phase 6 — Web scaffold and state foundation
 

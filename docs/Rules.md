@@ -109,6 +109,7 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - If DB schema changed: generate and migrate locally
 - If decisions or scope changed: update ADRs/EHs/plan
 - No `console.*` in prod code; use logger
+- Clean up temporary test directories: remove all `server/tmp-*` directories before committing
 - Update plan: mark relevant TODOs complete in `docs/phoTool.plan.md` (REQUIRED when touching `packages/shared/`, `server/src/`, `server/drizzle/`, or `docs/adr/`)
 
 Local enforcement

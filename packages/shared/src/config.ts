@@ -36,9 +36,10 @@ export const appConfigSchema = z.object({
   geocoder: z.object({
     enabled: z.boolean().default(true),
     precision: z.number().int().min(0).max(6).default(3),
-    datasets: z.object({
-      countryPolygons: z.boolean().default(false),
-      geoNames: z.boolean().default(false)
+    bigdatacloud: z.object({
+      baseUrl: z.string().url().default('https://api.bigdatacloud.net/data/reverse-geocode-client'),
+      timeoutMs: z.number().int().positive().default(5000),
+      retries: z.number().int().min(0).max(5).default(2),
     }).default({}),
   }).default({}),
   thumbnails: thumbnailsConfigSchema.default({}),
