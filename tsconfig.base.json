@@ -13,7 +13,7 @@
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["packages/shared/src/*"],
-      "@phoTool/shared": ["packages/shared/dist/index.d.ts"]
+      "@phoTool/shared": ["packages/shared/src/index.ts"]
     }
   }
 }
