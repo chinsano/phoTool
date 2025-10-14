@@ -1,4 +1,4 @@
-import type { AlbumId, CreateAlbumRequest, UpdateAlbumRequest } from '@phoTool/shared';
+import type { AlbumId, CreateAlbumRequest, UpdateAlbumRequest, AlbumListResponse } from '@phoTool/shared';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -340,7 +340,7 @@ describe('AlbumsService', () => {
       expect(results[0]).toBeDefined(); // First get
       expect(results[2]).toBeDefined(); // Second get
       expect(results[3]).toHaveProperty('albums');
-      expect((results[3] as any).albums).toHaveLength(1); // List
+      expect((results[3] as AlbumListResponse).albums).toHaveLength(1); // List
     });
 
     it('should maintain data integrity during updates', async () => {
