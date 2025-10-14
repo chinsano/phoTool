@@ -556,10 +556,9 @@
 - **Acceptance**: Workspace recognized; path aliases resolve; no build yet (no dependencies installed)
 
 **10) Rebuild shared package and verify imports**
-- [ ] Run `npm --workspace @phoTool/shared run build`
-- [ ] Verify all new exports present in `packages/shared/dist/`
-- [ ] Run full test suite: `npm run server:test` (all tests including new contracts green)
-- [ ] Run gates: `npm run lint:ci`, `npm run type-check`, `npm run depcruise`
+- [x] Run `npm --workspace @phoTool/shared run build`
+- [x] Verify all new exports present in `packages/shared/dist/`
+- [x] Ensure full pre-commit checklist from Rules.md passing
 - **Acceptance**: All gates pass; new contracts exported and usable; no breaking changes
 
 **Phase 6B (deferred) — React scaffold with Vite, TanStack Router, Zustand**
