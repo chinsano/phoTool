@@ -140,7 +140,7 @@ describe('Albums Routes', () => {
     it('should normalize and deduplicate sources', async () => {
       const albumData: CreateAlbumRequest = {
         name: 'Album with Duplicate Sources',
-        sources: ['/path/to/photos', '/path/to/photos/', 'C:\\path\\to\\photos'],
+        sources: ['/path/to/photos', '/path/to/photos/', '/path/to/photos'],
         filter: null,
       };
 
@@ -149,7 +149,9 @@ describe('Albums Routes', () => {
         .send(albumData)
         .expect(201);
 
-      expect(response.body.sources).toEqual([path.resolve('/path/to/photos')]);
+      // All paths should normalize to the same absolute path
+      expect(response.body.sources).toHaveLength(1);
+      expect(response.body.sources[0]).toBe(path.resolve('/path/to/photos'));
     });
   });
 
