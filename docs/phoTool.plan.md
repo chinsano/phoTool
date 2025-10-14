@@ -437,12 +437,133 @@
 - [x] Cache behavior: comprehensive tests for cache hit/miss, coordinate rounding, precision handling, and negative coordinates
 - Acceptance: all new tests green locally; coverage includes contracts, config, DB presence, service precedence, route validation, determinism, and cache behavior
 
-### Workpackages: Phase 6 — Web scaffold and state foundation
+### Workpackages: Phase 6 — State contracts, API client foundation, and UI state schema (UI-independent)
 
-- [ ] Scaffold Vite React app (`web/`) with TanStack Router, Zustand, Tailwind
-- [ ] Create `state/` slices (selection, filters, tags, layout, prefs)
-- [ ] Integrate API client typed from shared types
-- [ ] Smoke route renders app shell
+**1) Shared UI state contracts and schemas**
+- [x] Define `packages/shared/src/uiState.ts`: Zod schemas for UI persistence
+  - `UiStateSchema` with versioning (`version`, `currentVersion`, `migrations`)
+  - Slices: `SelectionState`, `FilterState`, `LayoutState`, `PreferencesState`
+  - `SelectionState`: `{ selectedFileIds: number[]; lastSelectedId: number | null }`
+  - `FilterState`: `{ activeChain: FilterChain; history: FilterChain[] }`
+  - `LayoutState`: `{ activeView: 'list'|'grid'|'map'|'stats'; panelSizes: Record<string, number> }`
+  - `PreferencesState`: `{ locale: string; theme: 'light'|'dark'|'auto' }`
+- [x] Add `packages/shared/src/ports/uiState.ts`: `UiStatePort` interface
+  - Methods: `get()`, `update(partial)`, `reset()`
+- [x] Export via `packages/shared/src/index.ts`
+- [x] Unit tests: `server/test/shared.uiState.contract.test.ts` (valid/invalid schemas, version migration structure)
+- **Acceptance**: Schemas parse valid states; invalid states rejected; tests green; exported from shared index
+
+**2) API client types and error contracts**
+- [x] Define `packages/shared/src/api/client.ts`: typed fetch wrapper interfaces
+  - `ApiClient` interface with methods matching existing endpoints
+  - `ApiError` schema (Zod): `{ status: number; code: string; message: string; details?: unknown }`
+  - `ApiResponse<T>` type: `{ ok: true; data: T } | { ok: false; error: ApiError }`
+- [x] Add `packages/shared/src/api/endpoints.ts`: endpoint path constants
+  - Maps all existing routes: health, scan, files, tags, aggregations, etc.
+- [x] Export via `packages/shared/src/index.ts`
+- [x] Unit tests: `server/test/shared.api.contract.test.ts` (error schema validation, endpoint constant completeness)
+- **Acceptance**: Error schema validates; endpoint constants type-safe; tests green
+
+**3) Albums file-backed JSON contracts (server-side, no UI)**
+- [x] Define `packages/shared/src/contracts/albums.ts`: Zod schemas
+  - `SmartAlbumSchema`: `{ version: 1; name: string; sources: string[]; filter: FilterChain }`
+  - `AlbumListResponse`, `AlbumDetailResponse`, `CreateAlbumRequest`, `UpdateAlbumRequest`
+- [x] Add `packages/shared/src/ports/albums.ts`: `AlbumsPort` interface
+  - Methods: `list()`, `get(id)`, `create(req)`, `update(id, req)`, `delete(id)`
+- [x] Export via `packages/shared/src/index.ts`
+- [x] Unit tests: `server/test/shared.albums.contract.test.ts` (valid/invalid schemas)
+- **Acceptance**: Album schemas parse valid JSON; invalid rejected; tests green
+
+**3.1) Comprehensive test coverage for shared contracts**
+- [x] Integration tests: `server/test/shared.integration.test.ts` (10 tests)
+  - Cross-module interactions between UI State, API Error, and Albums contracts
+  - Schema evolution and versioning across modules
+  - Error handling integration between modules
+- [x] Error simulation tests: `server/test/shared.error-simulation.test.ts` (14 tests)
+  - Malformed data handling and rejection
+  - Network errors (timeouts, connection failures)
+  - Concurrent access simulation
+  - File system errors and corruption scenarios
+  - Large dataset handling and memory usage
+- [x] Performance benchmark tests: `server/test/shared.performance.test.ts` (10 tests)
+  - Schema parsing performance benchmarks (<1ms per iteration)
+  - Large dataset handling (10k+ items efficiently)
+  - Memory usage validation (no significant leaks)
+  - Concurrent operations stability under load
+- [x] Updated pre-commit checklist in `docs/Rules.md` to include new test files
+- **Acceptance**: All 193 tests passing; comprehensive coverage of valid/invalid data, error scenarios, performance benchmarks, and integration testing
+
+**4) Albums service (file-backed JSON CRUD, server-side)**
+- [ ] Implement `server/src/services/albums.ts`: file-based storage in `data/albums/*.json`
+  - Atomic write with rotating backups (reuse pattern from upcoming UI state)
+  - List, get, create (with unique ID generation), update, delete
+  - Signature computation for `sources[]` (reuse from scanner)
+- [ ] Unit tests: `server/test/albums.service.test.ts` (CRUD, atomic writes, signature handling)
+- [ ] Logging with typed errors; no `console.*`
+- **Acceptance**: CRUD operations work; atomic writes verified; signatures computed correctly; tests green
+
+**5) Albums HTTP routes (server-side API)**
+- [ ] Implement `server/src/routes/albums.ts`: 
+  - `GET /api/albums` → list all albums
+  - `GET /api/albums/:id` → get single album
+  - `POST /api/albums` → create album (validate with shared schema)
+  - `PUT /api/albums/:id` → update album
+  - `DELETE /api/albums/:id` → delete album
+- [ ] Wire into `server/src/app.ts`
+- [ ] Route tests: `server/test/albums.routes.test.ts` (supertest covering happy paths, validation errors, 404s)
+- **Acceptance**: All routes respond correctly; validation enforced; tests green; aligned with shared contracts
+
+**6) UI state persistence API (server-side)**
+- [ ] Implement `server/src/services/uiState.ts`: manages `data/ui-state.json`
+  - Atomic write with rotating backups (`.bak.1`, `.bak.2`)
+  - Read with schema validation and migration support (placeholder for now)
+  - Default state generation if file missing
+- [ ] Unit tests: `server/test/uiState.service.test.ts` (read/write, backups, defaults, migration placeholder)
+- [ ] Logging with typed errors; no `console.*`
+- **Acceptance**: Atomic writes work; backups rotate; defaults correct; tests green
+
+**7) UI state HTTP routes (server-side API)**
+- [ ] Implement `server/src/routes/uiState.ts`:
+  - `GET /api/state` → current UI state
+  - `PUT /api/state` → update UI state (validate with shared schema)
+- [ ] Wire into `server/src/app.ts`
+- [ ] Route tests: `server/test/uiState.routes.test.ts` (supertest for GET/PUT, validation)
+- **Acceptance**: Routes work; validation enforced; tests green
+
+**8) i18n text matrix schema (contracts only, no implementation)**
+- [ ] Define `packages/shared/src/i18n/schema.ts`: Zod schemas
+  - `I18nTextSchema`: `{ label: string; hint?: string; doc?: string }`
+  - `I18nFileSchema`: `Record<UIElementId, I18nTextSchema>`
+  - Language codes enum: `'en' | 'de'`
+- [ ] Add `packages/shared/src/ports/i18n.ts`: `I18nPort` interface
+  - Methods: `loadLanguage(lang)`, `getText(uiId, lang)`
+- [ ] Export via `packages/shared/src/index.ts`
+- [ ] Unit tests: `server/test/shared.i18n.schema.test.ts` (valid/invalid text objects)
+- **Acceptance**: Schemas validate i18n JSON structure; tests green
+
+**9) Shared web build configuration preparation**
+- [ ] Create `web/` workspace directory structure
+  - `web/package.json` with workspace config (no dependencies yet)
+  - `web/tsconfig.json` extending `tsconfig.base.json` with path aliases for `@shared/*`
+  - `web/.gitignore` (node_modules, dist)
+- [ ] Verify workspace detection: `npm --workspace @phoTool/web --version` succeeds
+- [ ] Add placeholder `web/README.md` noting "Web workspace scaffolding - dependencies and Vite setup in Phase 6B"
+- **Acceptance**: Workspace recognized; path aliases resolve; no build yet (no dependencies installed)
+
+**10) Rebuild shared package and verify imports**
+- [ ] Run `npm --workspace @phoTool/shared run build`
+- [ ] Verify all new exports present in `packages/shared/dist/`
+- [ ] Run full test suite: `npm run server:test` (all tests including new contracts green)
+- [ ] Run gates: `npm run lint:ci`, `npm run type-check`, `npm run depcruise`
+- **Acceptance**: All gates pass; new contracts exported and usable; no breaking changes
+
+**Phase 6B (deferred) — React scaffold with Vite, TanStack Router, Zustand**
+- Vite + React + TypeScript setup
+- TanStack Router configuration
+- Zustand store wired to shared state schemas
+- Tailwind config
+- API client implementation using shared types from Phase 6
+- Smoke route rendering app shell
 - Acceptance: `web` dev server runs; basic navigation works
 
 ### Workpackages: Phase 7 — FilterBuilder UI and DnD to nodes

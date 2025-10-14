@@ -106,6 +106,9 @@ Store ADRs in `docs/adr/ADR-XXXX.md` and reference them in PRs.
 - Shared build: `npm --workspace @phoTool/shared run build`
 - Run tests: `npm run server:test` (and web tests when present)
   - Ensure shared schema/contract tests are included (under `server/test`)
+  - Include integration tests: `shared.integration.test.ts`
+  - Include error simulation tests: `shared.error-simulation.test.ts`
+  - Include performance benchmark tests: `shared.performance.test.ts`
 - If DB schema changed: generate and migrate locally
 - If decisions or scope changed: update ADRs/EHs/plan
 - No `console.*` in prod code; use logger
