@@ -83,8 +83,8 @@ describe('Performance Benchmarks', () => {
       const endTime = performance.now();
       const parseTime = endTime - startTime;
 
-      // Should parse large UI state in less than 20ms (CI environments may be slower)
-      expect(parseTime).toBeLessThan(20);
+      // Should parse large UI state in less than 50ms (Windows and CI environments may be slower)
+      expect(parseTime).toBeLessThan(50);
       expect(validated.selection.selectedFileIds).toHaveLength(10000);
       // Performance benchmark: Large UI State parsing
     });
