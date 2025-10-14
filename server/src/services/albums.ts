@@ -18,8 +18,8 @@ import { computeSignature, normalizePaths } from './scanner/fs.js';
 export class AlbumsService implements AlbumsPort {
   private readonly albumsDir: string;
 
-  constructor(albumsDir: string = path.resolve(process.cwd(), 'data', 'albums')) {
-    this.albumsDir = albumsDir;
+  constructor(albumsDir?: string) {
+    this.albumsDir = albumsDir ?? process.env.ALBUMS_DIR ?? path.resolve(process.cwd(), 'data', 'albums');
   }
 
   async list(): Promise<AlbumListResponse> {
@@ -104,21 +104,18 @@ export class AlbumsService implements AlbumsPort {
 
   async create(req: CreateAlbumRequest): Promise<AlbumDetailResponse> {
     try {
-      // Validate request
-      const validatedRequest = smartAlbumSchema.omit({ version: true }).parse(req);
-      
       // Generate unique ID
       const id = randomUUID() as AlbumId;
       
       // Normalize sources (normalizePaths already handles deduplication)
-      const normalizedSources = normalizePaths(validatedRequest.sources);
+      const normalizedSources = normalizePaths(req.sources);
 
       // Create album data
       const albumData = {
         version: 1 as const,
-        name: validatedRequest.name,
+        name: req.name,
         sources: normalizedSources,
-        filter: validatedRequest.filter,
+        filter: req.filter,
       };
 
       // Write to file
@@ -134,7 +131,7 @@ export class AlbumsService implements AlbumsPort {
         updatedAt: now,
       };
 
-      logger.info({ id, name: validatedRequest.name, sourceCount: normalizedSources.length }, 'Created album');
+      logger.info({ id, name: req.name, sourceCount: normalizedSources.length }, 'Created album');
       return response;
     } catch (error) {
       if ((error as NodeJS.ErrnoException & { status?: number }).status === 400) {
@@ -147,12 +144,6 @@ export class AlbumsService implements AlbumsPort {
 
   async update(id: AlbumId, req: UpdateAlbumRequest): Promise<AlbumDetailResponse> {
     try {
-      // Validate album ID format
-      albumIdSchema.parse(id);
-      
-      // Validate request
-      const validatedRequest = smartAlbumSchema.partial().omit({ version: true }).parse(req);
-      
       const filePath = this.getAlbumFilePath(id);
       const store = new AtomicJsonStore(filePath);
       
@@ -168,9 +159,9 @@ export class AlbumsService implements AlbumsPort {
       // Merge with existing data
       const updatedAlbum = {
         ...existingAlbum,
-        ...validatedRequest,
+        ...req,
         // Normalize sources if provided
-        sources: validatedRequest.sources ? normalizePaths(validatedRequest.sources) : existingAlbum.sources,
+        sources: req.sources ? normalizePaths(req.sources) : existingAlbum.sources,
       };
 
       // Validate merged data
@@ -187,7 +178,7 @@ export class AlbumsService implements AlbumsPort {
         updatedAt: now,
       };
 
-      logger.info({ id, updates: Object.keys(validatedRequest) }, 'Updated album');
+      logger.info({ id, updates: Object.keys(req) }, 'Updated album');
       return response;
     } catch (error) {
       if ((error as NodeJS.ErrnoException & { status?: number }).status === 404 || (error as NodeJS.ErrnoException & { status?: number }).status === 400) {

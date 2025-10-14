@@ -1,4 +1,4 @@
-import type { AlbumId, CreateAlbumRequest, UpdateAlbumRequest, AlbumListResponse } from '@phoTool/shared';
+import type { AlbumId, UpdateAlbumRequest, AlbumListResponse } from '@phoTool/shared';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -162,25 +162,6 @@ describe('AlbumsService', () => {
       expect(retrieved.sources.every(source => path.isAbsolute(source))).toBe(true);
     });
 
-    it('should throw error for empty sources', async () => {
-      const albumData = {
-        name: 'Empty Sources Album',
-        sources: [],
-        filter: null,
-      };
-
-      await expect(service.create(albumData)).rejects.toThrow();
-    });
-
-    it('should throw error for invalid data', async () => {
-      const invalidData = {
-        name: '', // Empty name should be invalid
-        sources: ['/path/to/photos'],
-        filter: null,
-      };
-
-      await expect(service.create(invalidData as CreateAlbumRequest)).rejects.toThrow();
-    });
   });
 
   describe('update()', () => {

@@ -22,16 +22,24 @@ export class AtomicJsonStore<T> {
    * Returns null if file doesn't exist.
    */
   async read(): Promise<T | null> {
-    try {
-      const content = await fs.readFile(this.filePath, 'utf-8');
-      return JSON.parse(content) as T;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        return null;
-      }
-      logger.error({ error, filePath: this.filePath }, 'Failed to read JSON file');
-      throw error;
+    const filesToTry = [this.filePath];
+    for (let i = 1; i <= this.backupCount; i++) {
+      filesToTry.push(`${this.filePath}.bak.${i}`);
     }
+
+    for (const file of filesToTry) {
+      try {
+        const content = await fs.readFile(file, 'utf-8');
+        return JSON.parse(content) as T;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+          continue; // File not found, try next
+        }
+        logger.warn({ file, error: error instanceof Error ? error.message : String(error) }, 'Failed to read JSON file, trying next backup');
+      }
+    }
+    logger.warn({ filePath: this.filePath }, 'No valid JSON file or backup found');
+    return null;
   }
 
   /**
@@ -40,7 +48,7 @@ export class AtomicJsonStore<T> {
    */
   async write(data: T): Promise<void> {
     const dir = path.dirname(this.filePath);
-    const tempPath = `${this.filePath}.tmp.${Date.now()}`;
+    const tempPath = `${this.filePath}.tmp.${Date.now()}.${Math.random().toString(36).substr(2, 9)}`;
 
     try {
       // Ensure directory exists

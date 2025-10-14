@@ -508,42 +508,42 @@
 - **Acceptance**: CRUD operations work; atomic writes verified; signatures computed correctly; tests green
 
 **5) Albums HTTP routes (server-side API)**
-- [ ] Implement `server/src/routes/albums.ts`: 
+- [x] Implement `server/src/routes/albums.ts`: 
   - `GET /api/albums` → list all albums
   - `GET /api/albums/:id` → get single album
   - `POST /api/albums` → create album (validate with shared schema)
   - `PUT /api/albums/:id` → update album
   - `DELETE /api/albums/:id` → delete album
-- [ ] Wire into `server/src/app.ts`
-- [ ] Route tests: `server/test/albums.routes.test.ts` (supertest covering happy paths, validation errors, 404s)
+- [x] Wire into `server/src/app.ts`
+- [x] Route tests: `server/test/albums.routes.test.ts` (supertest covering happy paths, validation errors, 404s)
 - **Acceptance**: All routes respond correctly; validation enforced; tests green; aligned with shared contracts
 
 **6) UI state persistence API (server-side)**
-- [ ] Implement `server/src/services/uiState.ts`: manages `data/ui-state.json`
+- [x] Implement `server/src/services/uiState.ts`: manages `data/ui-state.json`
   - Atomic write with rotating backups (`.bak.1`, `.bak.2`)
   - Read with schema validation and migration support (placeholder for now)
   - Default state generation if file missing
-- [ ] Unit tests: `server/test/uiState.service.test.ts` (read/write, backups, defaults, migration placeholder)
-- [ ] Logging with typed errors; no `console.*`
+- [x] Unit tests: `server/test/uiState.service.test.ts` (read/write, backups, defaults, migration placeholder)
+- [x] Logging with typed errors; no `console.*`
 - **Acceptance**: Atomic writes work; backups rotate; defaults correct; tests green
 
 **7) UI state HTTP routes (server-side API)**
-- [ ] Implement `server/src/routes/uiState.ts`:
+- [x] Implement `server/src/routes/uiState.ts`:
   - `GET /api/state` → current UI state
   - `PUT /api/state` → update UI state (validate with shared schema)
-- [ ] Wire into `server/src/app.ts`
-- [ ] Route tests: `server/test/uiState.routes.test.ts` (supertest for GET/PUT, validation)
+- [x] Wire into `server/src/app.ts`
+- [x] Route tests: `server/test/uiState.routes.test.ts` (supertest for GET/PUT, validation)
 - **Acceptance**: Routes work; validation enforced; tests green
 
 **8) i18n text matrix schema (contracts only, no implementation)**
-- [ ] Define `packages/shared/src/i18n/schema.ts`: Zod schemas
+- [x] Define `packages/shared/src/i18n/schema.ts`: Zod schemas
   - `I18nTextSchema`: `{ label: string; hint?: string; doc?: string }`
   - `I18nFileSchema`: `Record<UIElementId, I18nTextSchema>`
   - Language codes enum: `'en' | 'de'`
-- [ ] Add `packages/shared/src/ports/i18n.ts`: `I18nPort` interface
+- [x] Add `packages/shared/src/ports/i18n.ts`: `I18nPort` interface
   - Methods: `loadLanguage(lang)`, `getText(uiId, lang)`
-- [ ] Export via `packages/shared/src/index.ts`
-- [ ] Unit tests: `server/test/shared.i18n.schema.test.ts` (valid/invalid text objects)
+- [x] Export via `packages/shared/src/index.ts`
+- [x] Unit tests: `server/test/shared.i18n.schema.test.ts` (valid/invalid text objects)
 - **Acceptance**: Schemas validate i18n JSON structure; tests green
 
 **9) Shared web build configuration preparation**

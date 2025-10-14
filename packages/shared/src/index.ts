@@ -36,4 +36,6 @@ export * from './uiState.js';
 export * from './ports/uiState.js';
 export * from './api/client.js';
 export * from './api/endpoints.js';
+export * from './i18n/schema.js';
+export * from './ports/i18n.js';
 export * from './config.js';

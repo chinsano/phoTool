@@ -7,6 +7,7 @@ import pinoHttp from 'pino-http';
 import { logger } from './logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { createAggregationsRouter } from './routes/aggregations.js';
+import { createAlbumsRouter } from './routes/albums.js';
 import { createFilesRouter } from './routes/files.js';
 import { createFileTagsRouter } from './routes/fileTags.js';
 import { createHealthRouter } from './routes/health.js';
@@ -17,6 +18,7 @@ import { createSyncRouter } from './routes/sync.js';
 import { createTagGroupsRouter } from './routes/tagGroups.js';
 import { createTagsRouter } from './routes/tags.js';
 import { createThumbnailsRouter } from './routes/thumbnails.js';
+import { createUiStateRouter } from './routes/uiState.js';
 
 export function createApp(options?: { port?: number }) {
   const app = express();
@@ -38,6 +40,8 @@ export function createApp(options?: { port?: number }) {
   app.use('/api/tag-groups', createTagGroupsRouter());
   app.use('/api/tags', createTagsRouter());
   app.use('/api/files', createThumbnailsRouter());
+  app.use('/api/albums', createAlbumsRouter());
+  app.use('/api/state', createUiStateRouter());
   app.use(placeholdersRouter);
   // Preferred mount for aggregations
   app.use('/api/aggregations', createAggregationsRouter());
