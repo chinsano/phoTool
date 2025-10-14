@@ -547,12 +547,12 @@
 - **Acceptance**: Schemas validate i18n JSON structure; tests green
 
 **9) Shared web build configuration preparation**
-- [ ] Create `web/` workspace directory structure
+- [x] Create `web/` workspace directory structure
   - `web/package.json` with workspace config (no dependencies yet)
   - `web/tsconfig.json` extending `tsconfig.base.json` with path aliases for `@shared/*`
   - `web/.gitignore` (node_modules, dist)
-- [ ] Verify workspace detection: `npm --workspace @phoTool/web --version` succeeds
-- [ ] Add placeholder `web/README.md` noting "Web workspace scaffolding - dependencies and Vite setup in Phase 6B"
+- [x] Verify workspace detection: `npm --workspace @phoTool/web --version` succeeds
+- [x] Add placeholder `web/README.md` noting "Web workspace scaffolding - dependencies and Vite setup in Phase 6B"
 - **Acceptance**: Workspace recognized; path aliases resolve; no build yet (no dependencies installed)
 
 **10) Rebuild shared package and verify imports**
