@@ -495,12 +495,16 @@
 - **Acceptance**: All 193 tests passing; comprehensive coverage of valid/invalid data, error scenarios, performance benchmarks, and integration testing
 
 **4) Albums service (file-backed JSON CRUD, server-side)**
-- [ ] Implement `server/src/services/albums.ts`: file-based storage in `data/albums/*.json`
+- [x] Implement `server/src/services/albums.ts`: file-based storage in `data/albums/*.json`
   - Atomic write with rotating backups (reuse pattern from upcoming UI state)
   - List, get, create (with unique ID generation), update, delete
   - Signature computation for `sources[]` (reuse from scanner)
-- [ ] Unit tests: `server/test/albums.service.test.ts` (CRUD, atomic writes, signature handling)
-- [ ] Logging with typed errors; no `console.*`
+- [x] Implement `server/src/utils/atomicJsonStore.ts`: utility for atomic JSON file operations
+  - Atomic writes with temporary files and atomic moves
+  - Rotating backups (.bak.1, .bak.2, etc.)
+  - Error handling and cleanup
+- [x] Unit tests: `server/test/albums.service.test.ts` (CRUD, atomic writes, signature handling)
+- [x] Logging with typed errors; no `console.*`
 - **Acceptance**: CRUD operations work; atomic writes verified; signatures computed correctly; tests green
 
 **5) Albums HTTP routes (server-side API)**

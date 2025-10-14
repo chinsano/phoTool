@@ -10,7 +10,7 @@ export const smartAlbumSchema = z.object({
 
 export type SmartAlbum = z.infer<typeof smartAlbumSchema>;
 
-// Album ID type (filename without .json extension)
+// Album ID type (filename without .json extension) - supports UUIDs and alphanumeric
 export const albumIdSchema = z.string().min(1).max(255).regex(/^[a-zA-Z0-9_-]+$/);
 export type AlbumId = z.infer<typeof albumIdSchema>;
 
