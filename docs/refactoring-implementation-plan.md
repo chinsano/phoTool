@@ -424,49 +424,99 @@ npm run lint  # ✅ PASS (0 errors, 0 warnings)
 
 ---
 
-### WP-1.7: Input Sanitization
+### WP-1.7: Input Sanitization ✅
 **Priority**: 🔴 Critical  
 **Estimated Time**: 3 hours  
-**Dependencies**: None
+**Dependencies**: None  
+**Status**: ✅ COMPLETE (2025-10-15)
 
 #### Tasks
-- [ ] Install sanitization library
+- [✓] Install sanitization library
   ```bash
-  npm --workspace @phoTool/server install isomorphic-dompurify
+  npm --workspace @phoTool/server install isomorphic-dompurify jsdom
+  npm --workspace @phoTool/server install --save-dev @types/jsdom
   ```
 
-- [ ] Create sanitization utilities
-  - [ ] Create `server/src/utils/sanitization.ts`
-  - [ ] Implement `sanitizeHtml()` function
-  - [ ] Implement `sanitizePath()` function
-  - [ ] Add path traversal checks
+- [✓] Create sanitization utilities
+  - [✓] Create `server/src/utils/sanitization.ts`
+  - [✓] Implement `sanitizeHtml()` function
+  - [✓] Implement `sanitizePath()` function
+  - [✓] Implement `sanitizePaths()` helper function
+  - [✓] Add path traversal checks
+  - [✓] Add null byte injection checks
+  - [✓] Add optional allowed base paths validation
 
-- [ ] Apply sanitization
-  - [ ] Sanitize file paths in scanner service
-  - [ ] Sanitize any HTML content (future user notes)
-  - [ ] Validate all user-provided paths
+- [✓] Apply sanitization
+  - [✓] Sanitize file paths in scan route before scanner service
+  - [✓] Sanitize any HTML content (ready for future user notes)
+  - [✓] Validate all user-provided paths
 
-- [ ] Write tests
-  - [ ] Test HTML sanitization
-  - [ ] Test path traversal prevention
-  - [ ] Test path normalization
+- [✓] Write tests
+  - [✓] Test HTML sanitization (XSS prevention)
+  - [✓] Test path traversal prevention
+  - [✓] Test path normalization
+  - [✓] Test null byte detection
+  - [✓] Test allowed base path enforcement
+  - [✓] Test batch path sanitization
 
 #### Acceptance Criteria
 ```bash
-# Tests pass
-npm --workspace @phoTool/server run test -- utils/sanitization.test.ts
+# Sanitization tests pass ✅
+npm --workspace @phoTool/server run test -- utils/sanitization.test.ts  # ✅ PASS (23 tests)
 
-# Path traversal blocked
+# Scan route tests pass with path traversal prevention ✅
+npm --workspace @phoTool/server run test -- scan.routes.test.ts  # ✅ PASS (5 tests)
+
+# Path traversal blocked ✅
 curl -X POST http://localhost:5000/api/scan \
   -H "Content-Type: application/json" \
   -d '{"roots":["../../../etc/passwd"]}' \
-# Should return 400 ValidationError
+# Returns 400 ValidationError with "Path traversal detected"
+
+# All tests pass ✅
+npm --workspace @phoTool/server run test  # ✅ 379/379 PASSING
+
+# All checks pass ✅
+npm run lint        # ✅ PASS (0 errors, 0 warnings)
+npm run type-check  # ✅ PASS
+./scripts/pre-commit-check.sh  # ✅ ALL CHECKS PASSED
 ```
 
-#### Files to Create/Modify
-- `server/src/utils/sanitization.ts` (new)
-- `server/src/services/scanner/fs.ts` (add sanitization)
-- `server/test/utils/sanitization.test.ts` (new)
+#### Files Created/Modified
+- `server/src/utils/sanitization.ts` (new - sanitizeHtml, sanitizePath, sanitizePaths)
+- `server/src/routes/scan.ts` (added path sanitization before scanner service)
+- `server/test/utils/sanitization.test.ts` (new - 23 comprehensive tests)
+- `server/test/scan.routes.test.ts` (added 2 security tests)
+- `server/package.json` (added isomorphic-dompurify, jsdom, @types/jsdom)
+
+#### Implementation Notes
+- **HTML Sanitization**: Created `sanitizeHtml()` using DOMPurify with strict allowlist:
+  - Allowed tags: p, br, strong, em, u, h1-h6, ul, ol, li, a, code, pre
+  - Allowed attributes: href, title
+  - Strips all script tags, event handlers, and javascript: protocol links
+  - Ready for future user notes/comments feature
+- **Path Sanitization**: Created `sanitizePath()` with comprehensive security checks:
+  - Detects path traversal patterns (`../`, `\..`, etc.)
+  - Detects null byte injection attempts
+  - Normalizes paths to absolute paths using `path.resolve()`
+  - Optional allowed base paths enforcement for restricting access
+  - Works with both Unix and Windows path separators
+- **Scanner Protection**: Applied sanitization at the scan route entry point
+  - Sanitizes all user-provided root paths before passing to scanner service
+  - Prevents directory traversal attacks (e.g., `../../../etc/passwd`)
+  - Prevents null byte injection attacks
+- **Test Coverage**: Comprehensive test suite covering:
+  - XSS prevention (script tags, event handlers, javascript: links)
+  - Path traversal detection (various patterns and positions)
+  - Null byte injection detection
+  - Allowed base path enforcement
+  - Path normalization edge cases
+  - Batch path sanitization
+- **Security Impact**: Major security improvement:
+  - Prevents malicious users from scanning arbitrary directories
+  - Prevents XSS attacks in future user-generated content
+  - Provides foundation for future file upload features
+  - All existing tests continue to pass
 
 ---
 

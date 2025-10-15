@@ -6,6 +6,7 @@ import { NotFoundError, ValidationError } from '../errors.js';
 import { logger } from '../logger.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { ScannerService } from '../services/scanner/index.js';
+import { sanitizePaths } from '../utils/sanitization.js';
 
 interface StatusEntry {
   id: string;
@@ -30,6 +31,10 @@ export function createScanRouter() {
       throw new ValidationError('Invalid scan request', { details: parsedResult.error.flatten() });
     }
     const parsed = parsedResult.data;
+    
+    // Sanitize paths to prevent path traversal attacks
+    const sanitizedRoots = sanitizePaths(parsed.roots);
+    
     const id: ScanId = `${Date.now()}-${Math.random().toString(36).slice(2)}` as ScanId;
     const status: StatusEntry = { id, phase: 'queued', total: 0, scanned: 0 };
     statuses.set(id, status);
@@ -42,10 +47,9 @@ export function createScanRouter() {
       s.startedAt = new Date().toISOString();
       try {
         // We cannot know total cheaply without pre-walk; approximate via listFiles length
-        const roots = parsed.roots;
         const exts = cfg.scanner.extensions;
-        // Run scan
-        const result = await service.run(roots, parsed.mode ?? 'auto', exts);
+        // Run scan with sanitized paths
+        const result = await service.run(sanitizedRoots, parsed.mode ?? 'auto', exts);
         s.phase = 'completed';
         s.scanned = result.added + result.updated + result.deleted;
         s.total = s.scanned;

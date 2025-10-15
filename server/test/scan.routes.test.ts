@@ -37,6 +37,28 @@ describe('scan routes', () => {
     const res = await request(app).get('/api/scan/status').query({ scanId: 'does-not-exist' });
     expect(res.status).toBe(404);
   });
+
+  it('rejects path traversal attempts in roots', async () => {
+    const app = createApp();
+    const res = await request(app).post('/api/scan').send({ 
+      roots: ['../../../etc/passwd'],
+      mode: 'auto' 
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('validation_error');
+    expect(res.body.error.message).toContain('Path traversal detected');
+  });
+
+  it('rejects null byte injection in paths', async () => {
+    const app = createApp();
+    const res = await request(app).post('/api/scan').send({ 
+      roots: ['/home/user\0/malicious'],
+      mode: 'auto' 
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('validation_error');
+    expect(res.body.error.message).toContain('null byte detected');
+  });
 });
 
 
