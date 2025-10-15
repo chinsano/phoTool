@@ -15,6 +15,15 @@ describe('GET /api/health', () => {
       expect(parsed.data.ok).toBe(true);
     }
   });
+
+  it('response includes name and version', async () => {
+    const app = createApp();
+    const res = await request(app).get('/api/health').expect(200);
+    expect(res.body).toHaveProperty('name');
+    expect(res.body).toHaveProperty('version');
+    expect(typeof res.body.name).toBe('string');
+    expect(typeof res.body.version).toBe('string');
+  });
 });
 
 

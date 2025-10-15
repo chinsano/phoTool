@@ -98,21 +98,22 @@ npm --workspace @phoTool/server run test
 
 ---
 
-### WP-1.2: Route Error Handling Migration (Part 1)
+### WP-1.2: Route Error Handling Migration (Part 1) ✅
 **Priority**: 🔴 Critical  
 **Estimated Time**: 2-3 hours  
-**Dependencies**: WP-1.1
+**Dependencies**: WP-1.1  
+**Status**: ✅ COMPLETE (2025-10-15)
 
 #### Tasks
-- [ ] Migrate tags routes to new error handling
-  - [ ] Replace manual error responses with error throwing
-  - [ ] Use `NotFoundError` for missing tags
-  - [ ] Use `ConflictError` for duplicate slugs
-  - [ ] Add integration tests
+- [✓] Migrate tags routes to new error handling
+  - [✓] Replace manual error responses with error throwing
+  - [✓] Use `NotFoundError` for missing tags
+  - [✓] Use `ConflictError` for duplicate slugs
+  - [✓] Add integration tests
 
-- [ ] Migrate health routes
-  - [ ] Update health check error responses
-  - [ ] Add tests
+- [✓] Migrate health routes
+  - [✓] Update health check error responses
+  - [✓] Add tests
 
 #### Acceptance Criteria
 ```bash

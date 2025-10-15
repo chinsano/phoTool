@@ -5,6 +5,7 @@ import {
 } from '@phoTool/shared';
 import { Router } from 'express';
 
+import { ValidationError } from '../errors.js';
 import { TagsService } from '../services/tags.js';
 
 export function createTagsRouter() {
@@ -20,8 +21,7 @@ export function createTagsRouter() {
   router.post('/', async (req, res) => {
     const parsed = tagCreateSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: 'Invalid request', details: parsed.error.flatten() });
-      return;
+      throw new ValidationError('Invalid request', { details: parsed.error.flatten() });
     }
     const input: { name: string; color?: string | null; parent_id?: number | null } = {
       name: parsed.data.name,
@@ -35,13 +35,11 @@ export function createTagsRouter() {
   router.put('/:id', async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0) {
-      res.status(400).json({ error: 'Invalid id' });
-      return;
+      throw new ValidationError('Invalid id');
     }
     const parsed = tagUpdateSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: 'Invalid request', details: parsed.error.flatten() });
-      return;
+      throw new ValidationError('Invalid request', { details: parsed.error.flatten() });
     }
     const input: { name?: string; color?: string | null } = {};
     if ('name' in parsed.data) input.name = parsed.data.name as string;

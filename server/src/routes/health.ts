@@ -1,6 +1,7 @@
 import { HealthResponse } from '@phoTool/shared';
 import { Router } from 'express';
 
+import { InternalError } from '../errors.js';
 import { appMeta } from '../meta.js';
 
 export function createHealthRouter() {
@@ -14,8 +15,7 @@ export function createHealthRouter() {
     // Validate against Zod schema before sending (defensive during early dev)
     const parse = HealthResponse.safeParse(payload);
     if (!parse.success) {
-      res.status(500).json({ error: 'Invalid health payload' });
-      return;
+      throw new InternalError('Invalid health payload', { errors: parse.error.flatten() });
     }
     res.json(parse.data);
   });
