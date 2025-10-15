@@ -11,6 +11,7 @@ import { smartAlbumSchema, albumIdSchema } from '@phoTool/shared';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 
+import { NotFoundError } from '../errors.js';
 import { logger } from '../logger.js';
 import { AtomicJsonStore } from '../utils/atomicJsonStore.js';
 import { computeSignature, normalizePaths } from './scanner/fs.js';
@@ -76,7 +77,7 @@ export class AlbumsService implements AlbumsPort {
       
       const albumData = await store.read();
       if (!albumData) {
-        throw Object.assign(new Error('Album not found'), { status: 404 });
+        throw new NotFoundError(`Album with id ${id} not found`);
       }
 
       // Validate the album data
@@ -94,7 +95,7 @@ export class AlbumsService implements AlbumsPort {
       logger.debug({ id }, 'Retrieved album');
       return response;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException & { status?: number }).status === 404) {
+      if (error instanceof NotFoundError) {
         throw error;
       }
       logger.error({ error, id }, 'Failed to get album');
@@ -150,7 +151,7 @@ export class AlbumsService implements AlbumsPort {
       // Check if album exists
       const existingData = await store.read();
       if (!existingData) {
-        throw Object.assign(new Error('Album not found'), { status: 404 });
+        throw new NotFoundError(`Album with id ${id} not found`);
       }
 
       // Validate existing data
@@ -181,7 +182,7 @@ export class AlbumsService implements AlbumsPort {
       logger.info({ id, updates: Object.keys(req) }, 'Updated album');
       return response;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException & { status?: number }).status === 404 || (error as NodeJS.ErrnoException & { status?: number }).status === 400) {
+      if (error instanceof NotFoundError) {
         throw error;
       }
       logger.error({ error, id, request: req }, 'Failed to update album');
@@ -200,7 +201,7 @@ export class AlbumsService implements AlbumsPort {
       // Check if album exists
       const exists = await store.exists();
       if (!exists) {
-        throw Object.assign(new Error('Album not found'), { status: 404 });
+        throw new NotFoundError(`Album with id ${id} not found`);
       }
 
       // Delete the file and backups
@@ -208,7 +209,7 @@ export class AlbumsService implements AlbumsPort {
 
       logger.info({ id }, 'Deleted album');
     } catch (error) {
-      if ((error as NodeJS.ErrnoException & { status?: number }).status === 404) {
+      if (error instanceof NotFoundError) {
         throw error;
       }
       logger.error({ error, id }, 'Failed to delete album');

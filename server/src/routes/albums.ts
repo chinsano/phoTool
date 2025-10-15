@@ -1,9 +1,8 @@
 import { albumIdSchema, createAlbumRequestSchema, updateAlbumRequestSchema } from '@phoTool/shared';
-import type { Request, Response } from 'express';
 import { Router } from 'express';
-import { ZodError } from 'zod';
 
-import { logger } from '../logger.js';
+import { ValidationError } from '../errors.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { AlbumsService } from '../services/albums.js';
 
 // Lazy instantiation to allow environment variable changes in tests
@@ -22,217 +21,66 @@ export function resetAlbumsService(): void {
 }
 
 /**
- * GET /api/albums
- * List all albums
- */
-export const listAlbums = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const response = await getAlbumsService().list();
-    res.json(response);
-    logger.debug({ count: response.albums.length }, 'Listed albums');
-  } catch (error) {
-    logger.error({ error }, 'Failed to list albums');
-    res.status(500).json({
-      status: 500,
-      code: 'INTERNAL_ERROR',
-      message: 'Failed to list albums',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-/**
- * GET /api/albums/:id
- * Get a single album by ID
- */
-export const getAlbum = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    
-    // Validate album ID format
-    const albumId = albumIdSchema.parse(id);
-    
-    const response = await getAlbumsService().get(albumId);
-    res.json(response);
-    logger.debug({ id: albumId }, 'Retrieved album');
-  } catch (error) {
-    if (error instanceof ZodError) {
-      logger.warn({ error: error.issues, id: req.params.id }, 'Invalid album ID format');
-      res.status(400).json({
-        status: 400,
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid album ID format',
-        details: error.issues,
-      });
-      return;
-    }
-
-    if ((error as NodeJS.ErrnoException & { status?: number }).status === 404) {
-      logger.warn({ id: req.params.id }, 'Album not found');
-      res.status(404).json({
-        status: 404,
-        code: 'NOT_FOUND',
-        message: `Album with ID ${req.params.id} not found`,
-      });
-      return;
-    }
-
-    logger.error({ error, id: req.params.id }, 'Failed to get album');
-    res.status(500).json({
-      status: 500,
-      code: 'INTERNAL_ERROR',
-      message: 'Failed to get album',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-/**
- * POST /api/albums
- * Create a new album
- */
-export const createAlbum = async (req: Request, res: Response): Promise<void> => {
-  try {
-    // Validate request body
-    const requestData = createAlbumRequestSchema.parse(req.body);
-    
-    const response = await getAlbumsService().create(requestData);
-    res.status(201).json(response);
-    logger.info({ id: response.id, name: response.name }, 'Created album');
-  } catch (error) {
-    if (error instanceof ZodError) {
-      logger.warn({ error: error.issues, body: req.body }, 'Invalid album creation request');
-      res.status(400).json({
-        status: 400,
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid album creation request',
-        details: error.issues,
-      });
-      return;
-    }
-
-    logger.error({ error, body: req.body }, 'Failed to create album');
-    res.status(500).json({
-      status: 500,
-      code: 'INTERNAL_ERROR',
-      message: 'Failed to create album',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-/**
- * PUT /api/albums/:id
- * Update an existing album
- */
-export const updateAlbum = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    
-    // Validate album ID format
-    const albumId = albumIdSchema.parse(id);
-    
-    // Validate request body
-    const requestData = updateAlbumRequestSchema.parse(req.body);
-    
-    const response = await getAlbumsService().update(albumId, requestData);
-    res.json(response);
-    logger.info({ id: albumId, updates: Object.keys(requestData) }, 'Updated album');
-  } catch (error) {
-    if (error instanceof ZodError) {
-      const isIdError = error.issues.some(e => e.path.includes('id'));
-      logger.warn({ 
-        error: error.issues, 
-        id: req.params.id, 
-        body: req.body 
-      }, isIdError ? 'Invalid album ID format' : 'Invalid album update request');
-      
-      res.status(400).json({
-        status: 400,
-        code: 'VALIDATION_ERROR',
-        message: isIdError ? 'Invalid album ID format' : 'Invalid album update request',
-        details: error.issues,
-      });
-      return;
-    }
-
-    if ((error as NodeJS.ErrnoException & { status?: number }).status === 404) {
-      logger.warn({ id: req.params.id }, 'Album not found for update');
-      res.status(404).json({
-        status: 404,
-        code: 'NOT_FOUND',
-        message: `Album with ID ${req.params.id} not found`,
-      });
-      return;
-    }
-
-    logger.error({ error, id: req.params.id, body: req.body }, 'Failed to update album');
-    res.status(500).json({
-      status: 500,
-      code: 'INTERNAL_ERROR',
-      message: 'Failed to update album',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-/**
- * DELETE /api/albums/:id
- * Delete an album by ID
- */
-export const deleteAlbum = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    
-    // Validate album ID format
-    const albumId = albumIdSchema.parse(id);
-    
-    await getAlbumsService().delete(albumId);
-    res.status(204).send();
-    logger.info({ id: albumId }, 'Deleted album');
-  } catch (error) {
-    if (error instanceof ZodError) {
-      logger.warn({ error: error.issues, id: req.params.id }, 'Invalid album ID format');
-      res.status(400).json({
-        status: 400,
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid album ID format',
-        details: error.issues,
-      });
-      return;
-    }
-
-    if ((error as NodeJS.ErrnoException & { status?: number }).status === 404) {
-      logger.warn({ id: req.params.id }, 'Album not found for deletion');
-      res.status(404).json({
-        status: 404,
-        code: 'NOT_FOUND',
-        message: `Album with ID ${req.params.id} not found`,
-      });
-      return;
-    }
-
-    logger.error({ error, id: req.params.id }, 'Failed to delete album');
-    res.status(500).json({
-      status: 500,
-      code: 'INTERNAL_ERROR',
-      message: 'Failed to delete album',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-/**
  * Create albums router
  */
 export function createAlbumsRouter() {
   const router = Router();
+  const service = getAlbumsService();
 
-  router.get('/', listAlbums);
-  router.get('/:id', getAlbum);
-  router.post('/', createAlbum);
-  router.put('/:id', updateAlbum);
-  router.delete('/:id', deleteAlbum);
+  // GET /api/albums - List all albums
+  router.get('/', asyncHandler(async (_req, res) => {
+    const response = await service.list();
+    res.json(response);
+  }));
+
+  // GET /api/albums/:id - Get a single album by ID
+  router.get('/:id', asyncHandler(async (req, res) => {
+    const parsed = albumIdSchema.safeParse(req.params.id);
+    if (!parsed.success) {
+      throw new ValidationError('Invalid album ID format', { details: parsed.error.flatten() });
+    }
+    
+    const response = await service.get(parsed.data);
+    res.json(response);
+  }));
+
+  // POST /api/albums - Create a new album
+  router.post('/', asyncHandler(async (req, res) => {
+    const parsed = createAlbumRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ValidationError('Invalid album creation request', { details: parsed.error.flatten() });
+    }
+    
+    const response = await service.create(parsed.data);
+    res.status(201).json(response);
+  }));
+
+  // PUT /api/albums/:id - Update an existing album
+  router.put('/:id', asyncHandler(async (req, res) => {
+    const parsedId = albumIdSchema.safeParse(req.params.id);
+    if (!parsedId.success) {
+      throw new ValidationError('Invalid album ID format', { details: parsedId.error.flatten() });
+    }
+    
+    const parsedBody = updateAlbumRequestSchema.safeParse(req.body);
+    if (!parsedBody.success) {
+      throw new ValidationError('Invalid album update request', { details: parsedBody.error.flatten() });
+    }
+    
+    const response = await service.update(parsedId.data, parsedBody.data);
+    res.json(response);
+  }));
+
+  // DELETE /api/albums/:id - Delete an album by ID
+  router.delete('/:id', asyncHandler(async (req, res) => {
+    const parsed = albumIdSchema.safeParse(req.params.id);
+    if (!parsed.success) {
+      throw new ValidationError('Invalid album ID format', { details: parsed.error.flatten() });
+    }
+    
+    await service.delete(parsed.data);
+    res.status(204).send();
+  }));
 
   return router;
 }

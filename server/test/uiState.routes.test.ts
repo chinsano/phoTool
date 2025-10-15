@@ -353,7 +353,8 @@ describe('UI State Routes', () => {
         .send(largeState);
       
       expect([400, 500]).toContain(response.status);
-      expect(response.body).toHaveProperty('code');
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toHaveProperty('code');
     });
   });
 });

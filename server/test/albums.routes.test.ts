@@ -107,9 +107,8 @@ describe('Albums Routes', () => {
         .get(`/api/albums/${nonExistentId}`)
         .expect(404);
 
-      expect(response.body.status).toBe(404);
-      expect(response.body.code).toBe('NOT_FOUND');
-      expect(response.body.message).toContain(nonExistentId);
+      expect(response.body.error.code).toBe('not_found');
+      expect(response.body.error.message).toContain(nonExistentId);
     });
 
   });
@@ -222,8 +221,8 @@ describe('Albums Routes', () => {
         .send(updateData)
         .expect(404);
 
-      expect(response.body.status).toBe(404);
-      expect(response.body.code).toBe('NOT_FOUND');
+      expect(response.body.error.code).toBe('not_found');
+      expect(response.body.error.message).toContain(nonExistentId);
     });
 
   });
@@ -260,13 +259,62 @@ describe('Albums Routes', () => {
         .delete(`/api/albums/${nonExistentId}`)
         .expect(404);
 
-      expect(response.body.status).toBe(404);
-      expect(response.body.code).toBe('NOT_FOUND');
+      expect(response.body.error.code).toBe('not_found');
+      expect(response.body.error.message).toContain(nonExistentId);
     });
 
   });
 
   describe('Error handling', () => {
+    it('should return 400 for invalid album ID with special characters in GET', async () => {
+      const response = await request(app)
+        .get('/api/albums/invalid@id!')
+        .expect(400);
+
+      expect(response.body.error.code).toBe('validation_error');
+      expect(response.body.error.message).toContain('Invalid album ID format');
+    });
+
+    it('should return 400 for invalid album ID with special characters in PUT', async () => {
+      const response = await request(app)
+        .put('/api/albums/invalid@id!')
+        .send({ name: 'Test' })
+        .expect(400);
+
+      expect(response.body.error.code).toBe('validation_error');
+      expect(response.body.error.message).toContain('Invalid album ID format');
+    });
+
+    it('should return 400 for invalid album ID with special characters in DELETE', async () => {
+      const response = await request(app)
+        .delete('/api/albums/invalid@id!')
+        .expect(400);
+
+      expect(response.body.error.code).toBe('validation_error');
+      expect(response.body.error.message).toContain('Invalid album ID format');
+    });
+
+    it('should return 400 for invalid creation request', async () => {
+      const response = await request(app)
+        .post('/api/albums')
+        .send({ name: 123 }) // name should be string
+        .expect(400);
+
+      expect(response.body.error.code).toBe('validation_error');
+      expect(response.body.error.message).toContain('Invalid album creation request');
+    });
+
+    it('should return 400 for invalid update request', async () => {
+      const id = randomUUID();
+      const response = await request(app)
+        .put(`/api/albums/${id}`)
+        .send({ name: 123 }) // name should be string
+        .expect(400);
+
+      expect(response.body.error.code).toBe('validation_error');
+      expect(response.body.error.message).toContain('Invalid album update request');
+    });
+
     it('should handle corrupted album files gracefully', async () => {
       const id = randomUUID();
       // Create a file with invalid JSON

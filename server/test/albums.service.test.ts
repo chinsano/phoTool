@@ -119,7 +119,7 @@ describe('AlbumsService', () => {
       const nonExistentId = randomUUID();
       
       await expect(service.get(nonExistentId as AlbumId)).rejects.toMatchObject({
-        message: 'Album not found',
+        message: `Album with id ${nonExistentId} not found`,
         status: 404,
       });
     });
@@ -211,7 +211,7 @@ describe('AlbumsService', () => {
       const updateData = { name: 'Updated Name' };
 
       await expect(service.update(nonExistentId as AlbumId, updateData)).rejects.toMatchObject({
-        message: 'Album not found',
+        message: `Album with id ${nonExistentId} not found`,
         status: 404,
       });
     });
@@ -246,7 +246,7 @@ describe('AlbumsService', () => {
 
       // Verify album is deleted
       await expect(service.get(id)).rejects.toMatchObject({
-        message: 'Album not found',
+        message: `Album with id ${id} not found`,
         status: 404,
       });
 
@@ -259,7 +259,7 @@ describe('AlbumsService', () => {
       const nonExistentId = randomUUID();
 
       await expect(service.delete(nonExistentId as AlbumId)).rejects.toMatchObject({
-        message: 'Album not found',
+        message: `Album with id ${nonExistentId} not found`,
         status: 404,
       });
     });

@@ -5,6 +5,7 @@ import path from 'node:path';
 
 import { db } from '../db/client.js';
 import { files } from '../db/schema/files.js';
+import { AppError, NotFoundError } from '../errors.js';
 
 type SharpImage = {
   metadata: () => Promise<{ width?: number; height?: number }>;
@@ -25,8 +26,7 @@ async function loadSharp(): Promise<SharpLike> {
     const lib = (mod as unknown as { default?: unknown }).default ?? mod;
     return lib as SharpLike;
   } catch {
-    const e = Object.assign(new Error('Thumbnails not supported on this platform (sharp unavailable)'), { status: 501 });
-    throw e;
+    throw new AppError('Thumbnails not supported on this platform (sharp unavailable)', 501, 'thumbnails_unsupported');
   }
 }
 
@@ -40,7 +40,7 @@ export class ThumbnailsService {
   async getOrCreateThumbnail(fileId: number, req: ThumbnailRequest): Promise<ThumbnailInfo> {
     const [row] = await db.select().from(files).where(eq(files.id, fileId));
     if (!row) {
-      throw Object.assign(new Error('Not Found'), { status: 404 });
+      throw new NotFoundError(`File with id ${fileId} not found`);
     }
     const sharp = await loadSharp();
     const size = req.size ?? defaultConfig.thumbnails.defaultSize;

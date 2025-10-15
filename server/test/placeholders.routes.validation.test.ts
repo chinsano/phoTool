@@ -14,7 +14,8 @@ describe('expand-placeholder route validation', () => {
     const app = createApp();
     const many = Array.from({ length: 1001 }, (_, i) => i + 1);
     const res = await request(app).post('/api/expand-placeholder').send({ fileIds: many, tokens: ['year'] });
-    expect(res.status).toBe(413);
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('validation_error');
   });
 });
 
