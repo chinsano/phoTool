@@ -167,10 +167,15 @@ Stories must include: all variants/sizes; with/without icon; loading/disabled; R
 
 - Always break features into the smallest separately testable workpackages (target ≤ 1–2 hours).
 - Each workpackage must define its acceptance checks up front (unit tests, stories/states, and/or a short Playwright script).
+- **Before marking ANY workpackage complete** (in `docs/phoTool.plan.md` or `docs/refactoring-implementation-plan.md`), run the full pre-commit checklist (see above).
+  - **Quick check**: `./scripts/pre-commit-check.sh` automates all 11 pre-commit items.
+  - All quality gates must pass before checking `[x]` on any task.
 - Implementation loop for every workpackage:
   1) Create a small branch named `feat/<scope>-<item>`.
   2) Implement just that item with stories/tests first.
   3) Run local gates: `lint`, `type-check`, `test`, `story:build`.
-  4) Stop. Manually verify in Storybook or the dev app; adjust if needed.
-  5) Commit and open a PR; CI must pass before starting the next item.
+  4) **Run pre-commit checklist**: `./scripts/pre-commit-check.sh` (REQUIRED).
+  5) Stop. Manually verify in Storybook or the dev app; adjust if needed.
+  6) Commit and open a PR; CI must pass before starting the next item.
 - If a change exceeds 2 hours or touches multiple layers, split it before proceeding.
+- **No exceptions**: Every commit must pass the full pre-commit checklist, including when marking tasks complete in plan documents.

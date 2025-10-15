@@ -241,6 +241,34 @@
 - [ ] Tutorials: define shared schema, build TutorialRunner and tutorials route, implement Playwright adapter
 - [ ] Bundle server, web build, ExifTool, DB into portable folder
 
+---
+
+## ⚠️ PRE-COMMIT REQUIREMENT FOR ALL WORKPACKAGES
+
+**BEFORE committing ANY workpackage** (whether marked with `[x]` or in progress), you **MUST** run the complete pre-commit checklist from `docs/Rules.md`.
+
+### Quick Command:
+```bash
+./scripts/pre-commit-check.sh
+```
+
+This automated script verifies:
+1. ✅ Lint (zero warnings)
+2. ✅ Dependency boundaries
+3. ✅ Type checking
+4. ✅ Test suite (integration, error-simulation, performance)
+5. ✅ Temp directory cleanup
+6. ✅ DB migrations (if schema changed)
+7. ✅ Plan updates (REQUIRED for relevant files)
+8. ✅ No inappropriate console.* calls
+9. ✅ ADR updates (if applicable)
+
+**All checks must pass** before marking a workpackage as complete `[x]`.
+
+See detailed implementation guidelines in `docs/refactoring-implementation-plan.md`.
+
+---
+
 ### Workpackages: Phase 1 (granular)
 
 1) Initialize Node+TS monorepo, linting, tsconfig paths, workspaces
@@ -582,6 +610,27 @@
 - [x] Verify all new exports present in `packages/shared/dist/`
 - [x] Ensure full pre-commit checklist from Rules.md passing
 - **Acceptance**: All gates pass; new contracts exported and usable; no breaking changes
+
+---
+
+## Phase 7: UI Development - Pre-Commit Reminder
+
+**🚨 CRITICAL**: Before marking ANY Phase 7 task as complete `[x]`, you MUST run:
+```bash
+./scripts/pre-commit-check.sh
+```
+
+This applies to:
+- Every component implementation
+- Every test written
+- Every story created
+- Every Storybook configuration
+- Every i18n update
+- Every integration
+
+All quality gates (lint, type-check, tests, depcruise) must pass before checking off tasks.
+
+---
 
 ### Workpackages: Phase 7 — UI development (Test-Driven Development)
 

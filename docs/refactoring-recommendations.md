@@ -4,6 +4,8 @@
 **Status**: Proposed  
 **Scope**: Comprehensive architectural review and improvement suggestions
 
+> 📋 **Looking for the implementation plan?** See [`refactoring-implementation-plan.md`](./refactoring-implementation-plan.md) for step-by-step workpackages with testable acceptance criteria.
+
 ---
 
 ## Executive Summary
