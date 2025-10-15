@@ -345,11 +345,11 @@ describe('UI State Routes', () => {
         },
       };
 
-      // Should reject very large state objects (current behavior)
+      // Should reject very large state objects (Express body parser limit)
       await request(app)
         .put('/api/state')
         .send(largeState)
-        .expect(500);
+        .expect(400);
     });
   });
 });

@@ -110,7 +110,7 @@ describe('BigDataCloud integration', () => {
     const result = await reverseGeocodeBigDataCloud(10, 20);
     expect(result).toBeUndefined();
     expect(attempts).toBe(3); // initial + 2 retries
-  });
+  }, 10000); // Allow time for retries
 
   it('retries on HTTP error status', async () => {
     let attempts = 0;
@@ -124,7 +124,7 @@ describe('BigDataCloud integration', () => {
     const result = await reverseGeocodeBigDataCloud(10, 20);
     expect(result).toBeUndefined();
     expect(attempts).toBe(3); // initial + 2 retries
-  });
+  }, 10000); // Allow time for retries
 
   it('succeeds on second retry', async () => {
     let attempts = 0;
@@ -155,6 +155,6 @@ describe('BigDataCloud integration', () => {
 
     const result = await reverseGeocodeBigDataCloud(10, 20);
     expect(result).toBeUndefined(); // Should timeout before response
-  });
+  }, 10000); // Allow time for timeout + retries (1000ms * 3 attempts + overhead)
 });
 

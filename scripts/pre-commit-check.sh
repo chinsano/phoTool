@@ -62,6 +62,7 @@ echo ""
 # 6. Run tests
 echo "6️⃣  Running test suite..."
 echo "   This may take a while..."
+echo "   Includes: integration, error-simulation, performance, and route error handling tests"
 if npm run server:test; then
     echo -e "${GREEN}✅ PASS${NC}"
 else

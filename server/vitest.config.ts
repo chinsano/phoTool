@@ -14,7 +14,7 @@ export default defineConfig({
       }
     },
     hookTimeout: 10000,
-    testTimeout: 10000,
+    testTimeout: 3000, // 3s default, individual tests can override for slower operations
   },
 });
 

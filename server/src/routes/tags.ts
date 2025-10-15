@@ -6,19 +6,20 @@ import {
 import { Router } from 'express';
 
 import { ValidationError } from '../errors.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { TagsService } from '../services/tags.js';
 
 export function createTagsRouter() {
   const router = Router();
   const service = new TagsService();
 
-  router.get('/', async (_req, res) => {
+  router.get('/', asyncHandler(async (_req, res) => {
     const result = await service.list();
     const validated = tagListResponseSchema.parse(result);
     res.json(validated);
-  });
+  }));
 
-  router.post('/', async (req, res) => {
+  router.post('/', asyncHandler(async (req, res) => {
     const parsed = tagCreateSchema.safeParse(req.body);
     if (!parsed.success) {
       throw new ValidationError('Invalid request', { details: parsed.error.flatten() });
@@ -30,9 +31,9 @@ export function createTagsRouter() {
     if ('parent_id' in parsed.data) input.parent_id = parsed.data.parent_id ?? null;
     const { id } = await service.create(input);
     res.status(201).json({ id });
-  });
+  }));
 
-  router.put('/:id', async (req, res) => {
+  router.put('/:id', asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isFinite(id) || id <= 0) {
       throw new ValidationError('Invalid id');
@@ -46,7 +47,7 @@ export function createTagsRouter() {
     if ('color' in parsed.data) input.color = parsed.data.color ?? null;
     await service.update(id, input);
     res.status(204).end();
-  });
+  }));
 
   return router;
 }

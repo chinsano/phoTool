@@ -3,10 +3,11 @@ import { Router } from 'express';
 
 import { InternalError } from '../errors.js';
 import { appMeta } from '../meta.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 
 export function createHealthRouter() {
   const router = Router();
-  router.get('/', (_req, res) => {
+  router.get('/', asyncHandler(async (_req, res) => {
     const payload: HealthResponse = {
       ok: true,
       name: appMeta.name,
@@ -18,7 +19,7 @@ export function createHealthRouter() {
       throw new InternalError('Invalid health payload', { errors: parse.error.flatten() });
     }
     res.json(parse.data);
-  });
+  }));
   return router;
 }
 
