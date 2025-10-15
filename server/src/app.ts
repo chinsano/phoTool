@@ -7,6 +7,7 @@ import pinoHttp from 'pino-http';
 
 import { logger } from './logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { apiLimiter, expensiveLimiter } from './middleware/rateLimit.js';
 import { createAggregationsRouter } from './routes/aggregations.js';
 import { createAlbumsRouter } from './routes/albums.js';
 import { createFilesRouter } from './routes/files.js';
@@ -48,6 +49,14 @@ export function createApp(options?: { port?: number }) {
     // Disable COEP for cross-origin resources (thumbnails, etc.)
     crossOriginEmbedderPolicy: false,
   }));
+
+  // Rate limiting - apply specific expensive limiters BEFORE general limiter
+  // This ensures expensive operations get their own lower limits
+  app.use('/api/scan', expensiveLimiter);
+  app.use('/api/expand-placeholder', expensiveLimiter);
+  
+  // General API rate limiter for all API routes
+  app.use('/api', apiLimiter);
 
   app.use('/api/health', createHealthRouter());
   app.use('/api/sync', createSyncRouter());

@@ -303,46 +303,68 @@ npm run lint        # ✅ PASS (0 errors, 0 warnings)
 
 ---
 
-### WP-1.5: Rate Limiting
+### WP-1.5: Rate Limiting ✅
 **Priority**: 🔴 Critical  
 **Estimated Time**: 2-3 hours  
-**Dependencies**: None
+**Dependencies**: None  
+**Status**: ✅ COMPLETE (2025-10-15)
 
 #### Tasks
-- [ ] Install express-rate-limit
+- [✓] Install express-rate-limit
   ```bash
   npm --workspace @phoTool/server install express-rate-limit
   ```
 
-- [ ] Create rate limit middleware
-  - [ ] Create `server/src/middleware/rateLimit.ts`
-  - [ ] Define `apiLimiter` (100 req/15min)
-  - [ ] Define `expensiveLimiter` (10 req/15min)
-  - [ ] Configure headers and error messages
+- [✓] Create rate limit middleware
+  - [✓] Create `server/src/middleware/rateLimit.ts`
+  - [✓] Define `apiLimiter` (100 req/15min)
+  - [✓] Define `expensiveLimiter` (10 req/15min)
+  - [✓] Configure headers and error messages
 
-- [ ] Apply rate limits
-  - [ ] Apply `apiLimiter` to `/api/*`
-  - [ ] Apply `expensiveLimiter` to `/api/scan`
-  - [ ] Apply `expensiveLimiter` to `/api/expand-placeholder`
+- [✓] Apply rate limits
+  - [✓] Apply `expensiveLimiter` to `/api/scan` (before general limiter)
+  - [✓] Apply `expensiveLimiter` to `/api/expand-placeholder` (before general limiter)
+  - [✓] Apply `apiLimiter` to `/api/*` (general catch-all)
 
-- [ ] Write tests
-  - [ ] Test rate limit enforcement
-  - [ ] Test rate limit headers
-  - [ ] Test rate limit reset
+- [✓] Write tests
+  - [✓] Test rate limit enforcement
+  - [✓] Test rate limit headers
+  - [✓] Test rate limit reset
 
 #### Acceptance Criteria
 ```bash
-# Rate limits enforced
-for i in {1..101}; do curl -s http://localhost:5000/api/health; done | grep "Too many"
+# Rate limit headers present ✅
+npm --workspace @phoTool/server run test -- middleware/rateLimit.test.ts  # ✅ PASS (11 tests)
 
-# Tests pass
-npm --workspace @phoTool/server run test -- middleware/rateLimit.test.ts
+# All tests pass ✅
+npm --workspace @phoTool/server run test  # ✅ 351/351 PASSING
+
+# All checks pass ✅
+npm run type-check  # ✅ PASS
+npm run lint        # ✅ PASS (0 errors, 0 warnings)
+./scripts/pre-commit-check.sh  # ✅ ALL CHECKS PASSED
 ```
 
-#### Files to Create/Modify
-- `server/src/middleware/rateLimit.ts` (new)
-- `server/src/app.ts` (apply middleware)
-- `server/test/middleware/rateLimit.test.ts` (new)
+#### Files Created/Modified
+- `server/src/middleware/rateLimit.ts` (new - apiLimiter and expensiveLimiter configurations)
+- `server/src/app.ts` (applied rate limiting middleware)
+- `server/test/middleware/rateLimit.test.ts` (new - 11 comprehensive tests)
+- `server/package.json` (added express-rate-limit dependency)
+
+#### Implementation Notes
+- **Rate Limiter Configuration**: Two rate limiters with different thresholds:
+  - `apiLimiter`: 100 requests per 15 minutes for all API routes
+  - `expensiveLimiter`: 10 requests per 15 minutes for expensive operations (scan, placeholder expansion)
+- **Middleware Order**: Specific expensive limiters applied before general limiter to ensure they take precedence
+- **Error Messages**: Structured JSON error responses with consistent `rate_limit_exceeded` error code
+- **Headers**: Standard RateLimit-* headers included in all responses (limit, remaining, reset, policy)
+- **Memory Storage**: Using in-memory storage (default) - for production with multiple servers, consider Redis
+- **Test Coverage**: Comprehensive tests covering:
+  - Rate limit enforcement after exceeding max requests
+  - Rate limit headers present and decremented correctly
+  - Retry-after header included when rate limited
+  - Reset timestamp validation
+  - Expensive limiter triggers at lower threshold (10 vs 100)
 
 ---
 
