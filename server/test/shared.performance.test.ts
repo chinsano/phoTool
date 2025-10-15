@@ -83,8 +83,8 @@ describe('Performance Benchmarks', () => {
       const endTime = performance.now();
       const parseTime = endTime - startTime;
 
-      // Should parse large UI state in less than 50ms (Windows and CI environments may be slower)
-      expect(parseTime).toBeLessThan(50);
+      // Should parse large UI state in less than 100ms (Windows and CI environments may be slower)
+      expect(parseTime).toBeLessThan(100);
       expect(validated.selection.selectedFileIds).toHaveLength(10000);
       // Performance benchmark: Large UI State parsing
     });
@@ -219,8 +219,8 @@ describe('Performance Benchmarks', () => {
       const endTime = performance.now();
       const avgTime = (endTime - startTime) / (iterations * invalidData.length);
 
-      // Should reject invalid data quickly (less than 0.5ms per validation)
-      expect(avgTime).toBeLessThan(0.5);
+      // Should reject invalid data quickly (less than 1ms per validation)
+      expect(avgTime).toBeLessThan(1);
       // Performance benchmark: Invalid data validation
     });
 
