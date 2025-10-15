@@ -7,4 +7,8 @@ const sqlite = new Database(getDatabaseFilePath());
 
 export const db = drizzle(sqlite);
 
+export function closeDatabase(): void {
+  sqlite.close();
+}
+
 
