@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +30,24 @@ export function createApp(options?: { port?: number }) {
     customProps: () => ({ port: portForLogs })
   }));
   app.use(express.json());
+
+  // Security headers
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        // Allow data: and blob: for base64-encoded thumbnails
+        imgSrc: ["'self'", "data:", "blob:"],
+        // Allow inline scripts and styles for API responses (if needed)
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        // API-only server, no external resources needed
+        connectSrc: ["'self'"],
+      },
+    },
+    // Disable COEP for cross-origin resources (thumbnails, etc.)
+    crossOriginEmbedderPolicy: false,
+  }));
 
   app.use('/api/health', createHealthRouter());
   app.use('/api/sync', createSyncRouter());
